@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Azure.WebJobs.Description;
 
-namespace Microsoft.Azure.WebJobs.Extensions.TeamsFx
+namespace TeamsDevFunction
 {
     [Binding]
     [AttributeUsage(AttributeTargets.Parameter)]

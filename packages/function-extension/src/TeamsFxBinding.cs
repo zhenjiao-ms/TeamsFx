@@ -14,7 +14,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Azure.WebJobs.Extensions.TeamsFx
+namespace TeamsDevFunction
 {
     public class TeamsFxBinding : IBinding
     {

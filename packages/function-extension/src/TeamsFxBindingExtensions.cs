@@ -1,6 +1,7 @@
 ﻿using System;
+using Microsoft.Azure.WebJobs;
 
-namespace Microsoft.Azure.WebJobs.Extensions.TeamsFx
+namespace TeamsDevFunction
 {
     public static class TeamsFxBindingExtensions
     {

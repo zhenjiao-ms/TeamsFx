@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
-namespace Microsoft.Azure.WebJobs.Extensions.TeamsFx
+namespace TeamsDevFunction
 {
     public class TeamsFxBindingProvider : IBindingProvider
     {

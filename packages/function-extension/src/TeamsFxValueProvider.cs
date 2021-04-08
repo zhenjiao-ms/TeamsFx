@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 
-namespace Microsoft.Azure.WebJobs.Extensions.TeamsFx
+namespace TeamsDevFunction
 {
     public class TeamsFxValueProvider : IValueProvider
     {

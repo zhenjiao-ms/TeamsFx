@@ -4,7 +4,7 @@ using Microsoft.Azure.WebJobs.Logging;
 using Microsoft.Extensions.Logging;
 using System;
 
-namespace Microsoft.Azure.WebJobs.Extensions.TeamsFx
+namespace TeamsDevFunction
 {
     [Extension("TeamsFx")]
     public class TeamsFxBindingExtensionProvider : IExtensionConfigProvider

@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Microsoft.Azure.WebJobs.Extensions.TeamsFx
+namespace TeamsDevFunction
 {
     public static class Constants
     {

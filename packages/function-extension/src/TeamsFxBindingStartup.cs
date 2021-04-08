@@ -1,8 +1,9 @@
-﻿using Microsoft.Azure.WebJobs.Hosting;
-using Microsoft.Azure.WebJobs.Extensions.TeamsFx;
+﻿using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Hosting;
+using TeamsDevFunction;
 
 [assembly: WebJobsStartup(typeof(TeamsFxBindingStartup))]
-namespace Microsoft.Azure.WebJobs.Extensions.TeamsFx
+namespace TeamsDevFunction
 {
     public class TeamsFxBindingStartup : IWebJobsStartup
     {
