@@ -1,0 +1,28 @@
+{
+    "create":[
+        {
+            "name": "app-name",
+            "type": "text",
+            "title": "App Name",
+            "validation": {
+                "pattern": "^[\\da-zA-Z]+$"
+            },
+            "default": "myapp"
+        },
+        {
+            "name": "solution",
+            "type": "singleSelect",
+            "title": "Select a solution",
+            "option": []
+        },
+        {
+            "name": "folder",
+            "type":"folder",
+            "title": "Select root folder of the project",
+            "validation": {
+                "namespace": "",
+                "method": "validateFolder"
+            }
+        }
+    ]
+}

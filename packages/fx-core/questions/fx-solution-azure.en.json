@@ -1,0 +1,116 @@
+{
+    "create":[
+        {
+            "name": "capabilities",
+            "type": "multiSelect",
+            "title": "Add capabilities",
+            "prompt": "Choose the capabilities for your project setup",
+            "option": [
+                {
+                    "id": "Tab",
+                    "label": "Tab",
+                    "description": "Embeds a web-based app experience in a tab in a Teams chat, channel, or personal workspace."
+                },
+                {
+                    "id": "Bot",
+                    "label": "Bot",
+                    "description": "Bots allow you to interact with and obtain information from a software or website in a text/search/conversational manner."    
+                },
+                {
+                    "id": "MessageExtension",
+                    "label": "MessageExtension",
+                    "description":"Messaging extensions allow users to interact with your web service through buttons and forms in the Microsoft Teams client."
+                }
+            ],
+            "default": ["Tab"]
+        },
+        {
+            "name": "tab-scopes",
+            "title": "Tab scopes",
+            "type": "singleSelect",
+            "option": ["personal"],
+            "default": "personal"
+        },
+        {
+            "name": "host-type",
+            "title": "Select front-end hosting type",
+            "type": "singleSelect",
+            "option": [
+                {
+                    "id":"Azure",
+                    "label": "Azure",
+                    "description": "Azure Cloud"
+                },
+                {
+                    "id":"SPFx",
+                    "label": "SPFx",
+                    "description": "SharePoint Framework"
+                }
+            ],
+            "default": "Azure"
+        },
+        {
+            "name": "azure-resources",
+            "title": "Additional cloud resources",
+            "type": "multiSelect",
+            "option": [
+                {
+                    "id":"sql",
+                    "label": "sql",
+                    "description": "Azure SQL Database"
+                },
+                {
+                    "id":"function",
+                    "label": "function",
+                    "description": "New APIs from Azure Functions"
+                },
+                {
+                    "id":"apim",
+                    "label": "apim",
+                    "description": "Publish APIs to API Management"
+                }
+            ],
+            "default": []
+        }
+    ],
+    "update":[
+        {
+            "name": "add-azure-resources",
+            "title": "Select Azure resources to add",
+            "type": "multiSelect",
+            "option": [
+                {
+                    "id":"sql",
+                    "label": "sql",
+                    "description": "Azure SQL Database"
+                },
+                {
+                    "id":"function",
+                    "label": "function",
+                    "description": "New APIs from Azure Functions"
+                },
+                {
+                    "id":"apim",
+                    "label": "apim",
+                    "description": "Publish APIs to API Management"
+                }
+            ],
+            "default": []
+        },
+        {
+            "name": "ask-sub",
+            "type": "func",
+            "namespace": "fx-solution-azure",
+            "method": "askSubscription"
+        }
+    ],
+    "deploy":[
+        {
+            "name": "deploy-plugin",
+            "title": "Please select which resource(s) to deploy",
+            "type": "multiSelect",
+            "option": [],
+            "default": []
+        }
+    ]
+}
