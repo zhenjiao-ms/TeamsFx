@@ -5,7 +5,7 @@
     <AssemblyName>TeamsDevFunction</AssemblyName>
     <RootNamespace>TeamsDevFunction</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.1.7</Version>
+    <Version>0.1.8</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
