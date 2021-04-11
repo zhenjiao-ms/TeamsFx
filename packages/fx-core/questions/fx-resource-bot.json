@@ -1,0 +1,37 @@
+{
+    "create":[
+        {
+            "name": "programmingLanguageQuestion",
+            "type": "singleSelect",
+            "option": ["javascript", "typescript"],
+            "title": "Which programming language is scaffold based on?",
+            "default": "typescript"
+        },
+        {
+            "name": "wayToRegisterBotQuestion",
+            "type": "singleSelect",
+            "option": [
+                {
+                    "id": "create-new",
+                    "label": "Create a new bot registration"
+                },
+                {
+                    "id": "reuse-existing",
+                    "label": "Reuse an existing bot registration"
+                }
+            ],
+            "title": "Which way to get a bot registration?",
+            "default": "create-new"
+        },
+        {
+            "name": "botIdQuestion",
+            "type": "text",
+            "title": "Please enter bot id"
+        },
+        {
+            "name": "botPasswordQuestion",
+            "type": "password",
+            "title": "Please enter bot password"
+        }
+    ]
+}

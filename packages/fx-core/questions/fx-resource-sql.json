@@ -1,0 +1,19 @@
+{
+    "provison":[
+        {
+            "name": "sql-admin-name",
+            "title": "Admin name of SQL",
+            "type": "text"
+        },
+        {
+            "name": "sql-password",
+            "title": "Admin password of SQL",
+            "type": "password"
+        },
+        {
+            "name": "sql-confirm-password",
+            "title": "Confirm admin password of SQL",
+            "type": "password"
+        }
+    ]
+}

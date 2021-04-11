@@ -1,0 +1,26 @@
+{
+    "create":[
+        {
+            "type": "singleSelect",
+            "name": "spfx-framework-type",
+            "title": "Which framework would you like to use?",
+            "option": ["none", "react"],
+            "default": "none"
+        },
+        {
+            "type": "text",
+            "name": "spfx-webpart-name",
+            "title": "Webpart Name",
+            "default": "helloworld",
+            "validation": {
+              "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+            }
+        },
+        {
+            "type": "text",
+            "name": "spfx-webpart-desp",
+            "title": "Webpart Description",
+            "default": "helloworld description"
+        }
+    ]
+}

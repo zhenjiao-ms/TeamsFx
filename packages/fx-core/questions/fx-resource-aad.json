@@ -1,0 +1,10 @@
+{
+    "aadUpdatePermission":[
+        {
+            "type": "singleSelect",
+            "name": "aad-env",
+            "title": "Which Azure AD app do you want to update permission for?",
+            "option": ["azure", "local", "both"]
+        }
+    ]
+}

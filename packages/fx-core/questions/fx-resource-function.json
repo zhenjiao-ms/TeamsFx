@@ -1,0 +1,34 @@
+{
+    "create":[
+        {
+            "name": "function-name",
+            "title": "Please provide function name.",
+            "type": "text"
+        },
+        {
+            "name": "function-language",
+            "title": "Please choose a programming language for the Azure function app.",
+            "type": "singleSelect",
+            "option": [
+                "JavaScript",
+                "TypeScript"
+            ]
+        }
+    ],
+    "update":[
+        {
+            "name": "function-name",
+            "title": "Please provide function name.",
+            "type": "text"
+        },
+        {
+            "name": "function-language",
+            "title": "Please choose a programming language for the Azure function app.",
+            "type": "singleSelect",
+            "option": [
+                "JavaScript",
+                "TypeScript"
+            ]
+        }
+    ]
+}

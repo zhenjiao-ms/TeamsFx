@@ -1,0 +1,40 @@
+{
+    "update":[
+        {
+            "type": "singleSelect",
+            "name": "apim-service",
+            "title": "Select API Management service",
+            "option": [],
+            "returnObject": true,
+            "skipSingleOption": false
+        }
+    ],
+    "deploy":[
+        {
+            "type": "singleSelect",
+            "name": "open-api-document",
+            "title": "Select Open API document",
+            "option": [],
+            "returnObject": true,
+            "skipSingleOption": false
+        },
+        {
+            "type": "text",
+            "name": "api-prefix",
+            "title": "Input API name prefix"
+        },
+        {
+            "type": "singleSelect",
+            "name": "api-version",
+            "title": "Select an API version",
+            "option": [],
+            "returnObject": true,
+            "skipSingleOption": false
+        },
+        {
+            "type": "text",
+            "name": "new-api-version",
+            "title": "Input API version"
+        }
+    ]
+}
