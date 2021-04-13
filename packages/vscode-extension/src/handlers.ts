@@ -530,9 +530,8 @@ export async function openWelcomeHandler() {
     enableScripts: true,
     retainContextWhenHidden: true
   });
-  welcomePanel.webview.html = getHtmlForWebview();
-
-  //WebviewPanel.createOrShow(ext.context.extensionPath, PanelType.QuickStart);
+  
+  isFeatureFlag() ? WebviewPanel.createOrShow(ext.context.extensionPath, PanelType.QuickStart) : welcomePanel.webview.html = getHtmlForWebview();
 }
 
 export async function openSamplesHandler() {
