@@ -14,7 +14,7 @@ export const Void = {};
  * The key of global config visible to all resource plugins.
  */
 export const GLOBAL_CONFIG = "solution";
-export const SELECTED_PLUGINS = "selectedPlugins";
+// export const SELECTED_PLUGINS = "selectedPlugins";
 
 /**
  * Used to track whether provision succeeded
@@ -26,6 +26,11 @@ export const SOLUTION_PROVISION_SUCCEEDED = "provisionSucceeded";
  * Config key whose value is the content of permissions.json file
  */
 export const PERMISSION_REQUEST = "permissionRequest";
+
+/**
+ * Config key whose value is either javascript, typescript or csharp.
+ */
+export const PROGRAMMING_LANGUAGE = "programmingLanguage";
 
 /**
  * Config keys that are useful for generating remote teams app manifest
@@ -70,6 +75,7 @@ export enum SolutionError {
     FailedToGetAppStudioToken = "FailedToGetAppStudioToken",
     FailedToLoadManifestFile = "FailedToLoadManifestFile",
     CannotRunProvisionInSPFxProject = "CannotRunProvisionInSPFxProject",
+    CannotRunThisTaskInSPFxProject = "CannotRunThisTaskInSPFxProject",
     FrontendEndpointAndDomainNotFound = "FrontendEndpointAndDomainNotFound",
     RemoteClientIdNotFound = "RemoteClientIdNotFound",
     AddResourceNotSupport = "AddResourceNotSupport",
@@ -78,6 +84,7 @@ export enum SolutionError {
     DeploymentInProgress = "DeploymentInProgress",
     UnknownSolutionRunningState = "UnknownSolutionRunningState",
     CannotDeployBeforeProvision = "CannotDeployBeforeProvision",
+    CannotPublishBeforeProvision = "CannotPublishBeforeProvision",
     NoSubscriptionFound = "NoSubscriptionFound",
     NoSubscriptionSelected = "NoSubscriptionSelected",
     FailedToGetParamForRegisterTeamsAppAndAad = "FailedToGetParamForRegisterTeamsAppAndAad",
@@ -85,6 +92,7 @@ export enum SolutionError {
     InternelError = "InternelError",
     RegisterTeamsAppAndAadError = "RegisterTeamsAppAndAadError",
     UpdateManifestError = "UpdateManifestError",
+    GetLocalDebugConfigError = "GetLocalDebugConfigError",
 }
 
 export const LOCAL_DEBUG_TAB_ENDPOINT = "localTabEndpoint";
@@ -105,6 +113,8 @@ export const REMOTE_CLIENT_SECRET = "clientSecret";
 export const LOCAL_DEBUG_TEAMS_APP_ID = "localDebugTeamsAppId";
 // Teams App Id for remote
 export const REMOTE_TEAMS_APP_ID = "remoteTeamsAppId";
+
+export const PROVISION_MANIFEST = "provisionManifest";
 
 export const TEAMS_APP_MANIFEST_TEMPLATE = `{
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.7/MicrosoftTeams.schema.json",
