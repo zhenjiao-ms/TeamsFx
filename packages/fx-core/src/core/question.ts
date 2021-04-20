@@ -8,6 +8,9 @@ export enum CoreQuestionNames {
     Solution = "solution",
     Stage = "stage",
     SubStage = "substage",
+    EnvName = "env-name",
+    EnvLocal = "env-local",
+    EnvSideLoading = "env-sideloading"
 }
 
 export const QuestionAppName: TextInputQuestion = {
@@ -35,4 +38,41 @@ export const QuestionSelectSolution: SingleSelectQuestion = {
     name: CoreQuestionNames.Solution,
     title: "Select a solution",
     option: [],
+    skipSingleOption:true
+};
+
+
+export const QuestionEnvName: TextInputQuestion = {
+    type: NodeType.text,
+    name: CoreQuestionNames.EnvName,
+    title: "Environment Name",
+    validation: {
+        namespace: "",
+        method:"validateEnvName"
+    },
+    default: "myenv",
+};
+
+export const QuestionEnvLocal: SingleSelectQuestion = {
+    type: NodeType.singleSelect,
+    name: CoreQuestionNames.EnvLocal,
+    title: "Environment Is Local?",
+    option: ["true", "false"]
+};
+
+export const QuestionEnvSideLoading: SingleSelectQuestion = {
+    type: NodeType.singleSelect,
+    name: CoreQuestionNames.EnvSideLoading,
+    title: "Environment sideloading?",
+    option: ["true", "false"]
+};
+
+export const QuestionSelectEnv: SingleSelectQuestion = {
+    type: NodeType.singleSelect,
+    name: CoreQuestionNames.EnvName,
+    title: "Select an environment",
+    option: {
+        namespace: "",
+        method:"listEnv"
+    }
 };

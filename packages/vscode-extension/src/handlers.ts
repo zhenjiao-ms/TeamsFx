@@ -186,6 +186,27 @@ export async function publishHandler(): Promise<Result<unknown, FxError>> {
   return await runCommand(Task.publish);
 }
 
+export async function createEnvHandler(): Promise<Result<unknown, FxError>> {
+  ExtTelemetry.sendTelemetryEvent("createEnv-start", {
+    [TelemetryProperty.TriggerFrom]: TelemetryTiggerFrom.CommandPalette
+  });
+  return await runCommand(Task.createEnv);
+}
+
+export async function removeEnvHandler(): Promise<Result<unknown, FxError>> {
+  ExtTelemetry.sendTelemetryEvent("removeEnv-start", {
+    [TelemetryProperty.TriggerFrom]: TelemetryTiggerFrom.CommandPalette
+  });
+  return await runCommand(Task.removeEnv);
+}
+
+export async function switchEnvHandler(): Promise<Result<unknown, FxError>> {
+  ExtTelemetry.sendTelemetryEvent("switchEnv-start", {
+    [TelemetryProperty.TriggerFrom]: TelemetryTiggerFrom.CommandPalette
+  });
+  return await runCommand(Task.switchEnv);
+}
+
 const coreExeceutor: RemoteFuncExecutor = async function ( func: Func, answers: Inputs
 ): Promise<Result<unknown, FxError>> {
   return await core.executeQuestionFlowFunction(func, answers);
@@ -233,7 +254,7 @@ export async function runCommand(task: Task): Promise<Result<unknown, FxError>> 
     if (node) {
       VsCodeLogInstance.info(`Question tree:${JSON.stringify(node, null, 4)}`);
       const res: InputResult = await traverse(node, inputs, VS_CODE_UI, coreExeceutor);
-      VsCodeLogInstance.info(`User input:${JSON.stringify(res, null, 4)}`);
+      VsCodeLogInstance.info(`User input:${JSON.stringify(inputs)}`);
       if (res.type === InputResultType.error) {
         throw res.error!;
       } else if (res.type === InputResultType.cancel) {
@@ -260,6 +281,9 @@ export async function runCommand(task: Task): Promise<Result<unknown, FxError>> 
     else if (task === Task.deploy) result = await core.deploy(inputs);
     else if (task === Task.build) result = await core.build(inputs);
     else if (task === Task.publish) result = await core.publish(inputs);
+    else if (task === Task.createEnv) result = await core.createEnv(inputs);
+    else if (task === Task.removeEnv) result = await core.removeEnv(inputs);
+    else if (task === Task.switchEnv) result = await core.switchEnv(inputs);
     else {
       throw new SystemError(
         ExtensionErrors.UnsupportedOperation,

@@ -38,9 +38,11 @@ import * as error from "./error";
 import * as jsonschema from "jsonschema";
 import { CoreQuestionNames, QuestionAppName } from "./question";
 
+export let GlobalTools:Tools;
+
 export class FxCore implements Core {
   
-  tools: Tools;
+  // tools: Tools;
 
   /**
    * global solutions
@@ -48,12 +50,12 @@ export class FxCore implements Core {
   globalSolutions: Map<string, SolutionPlugin> = new Map<string, SolutionPlugin>();
 
   constructor(tools: Tools) {
-    this.tools = tools;
+    GlobalTools = tools;
   }
 
   buildCleanCoreContext():CoreContext{
     const coreContext:CoreContext = {
-      ...this.tools,
+      ...GlobalTools,
       projectPath: "",
       projectSetting:{
         name: "myapp",
@@ -86,8 +88,8 @@ export class FxCore implements Core {
       const deployTemplates:ResourceTemplates = {};
       if(resources){
         for(const resource of resources){
-          const provisionTempalte: ResourceTemplate = await fs.readJson(`${projectPath}\\.${ConfigFolderName}\\${envName}.${resource}.provision.tpl.json`);
-          const deployTempalte: ResourceTemplate = await fs.readJson(`${projectPath}\\.${ConfigFolderName}\\${envName}.${resource}.deploy.tpl.json`);
+          const provisionTempalte: ResourceTemplate = await fs.readJson(`${projectPath}\\.${ConfigFolderName}\\${resource}.provision.tpl.json`);
+          const deployTempalte: ResourceTemplate = await fs.readJson(`${projectPath}\\.${ConfigFolderName}\\${resource}.deploy.tpl.json`);
           privisionTemplates[resource] = provisionTempalte;
           deployTemplates[resource] = deployTempalte;
         }
@@ -106,7 +108,7 @@ export class FxCore implements Core {
         deployTemplates: deployTemplates,
         variableDict: varDict,
         globalSolutions: this.globalSolutions,
-        ... this.tools
+        ... GlobalTools
       };
       return coreCtx;
     }
@@ -162,7 +164,7 @@ export class FxCore implements Core {
   @hooks([errorHandlerMW, concurrentMW])
   public async provision(inputs: Inputs): Promise<Result<Void, FxError>> {
     const coreContext = await this.loadCoreContext(inputs.projectPath);
-    coreContext.tokenProvider = this.tools.tokenProvider;
+    coreContext.tokenProvider = GlobalTools.tokenProvider;
     return await Executor.provision(coreContext, inputs);
   }
 
@@ -186,21 +188,21 @@ export class FxCore implements Core {
 
   
   @hooks([errorHandlerMW, concurrentMW])
-  public async createEnv(env: EnvMeta, inputs: Inputs): Promise<Result<Void, FxError>> {
+  public async createEnv(inputs: Inputs): Promise<Result<Void, FxError>> {
     const coreContext = await this.loadCoreContext(inputs.projectPath);
-    return await Executor.createEnv(coreContext, env, inputs);
+    return await Executor.createEnv(coreContext, inputs);
   }
 
   @hooks([errorHandlerMW, concurrentMW])
-  public async removeEnv( env: string, inputs: Inputs ): Promise<Result<Void, FxError>> {
+  public async removeEnv(inputs: Inputs ): Promise<Result<Void, FxError>> {
     const coreContext = await this.loadCoreContext(inputs.projectPath);
-    return await Executor.removeEnv(coreContext, env, inputs);
+    return await Executor.removeEnv(coreContext, inputs);
   }
 
   @hooks([errorHandlerMW, concurrentMW])
-  public async switchEnv(env: string, inputs: Inputs): Promise<Result<Void, FxError>> {
+  public async switchEnv(inputs: Inputs): Promise<Result<Void, FxError>> {
     const coreContext = await this.loadCoreContext(inputs.projectPath);
-    return await Executor.switchEnv(coreContext, env, inputs);
+    return await Executor.switchEnv(coreContext, inputs);
   }
 
   @hooks([errorHandlerMW, concurrentMW])

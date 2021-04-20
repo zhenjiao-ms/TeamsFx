@@ -21,14 +21,12 @@
  */
  
 import {  Result } from "neverthrow";  
-import { EnvMeta, Func, FunctionRouter, FxError,  Inputs,  ProjectSetting,  ProjectState,  QTreeNode, ResourceTemplates, Task, Tools, VariableDict, Void} from "./index";
+import { EnvMeta, Func, FunctionRouter, FxError,  Inputs,  QTreeNode, Task, Void} from "./index";
 
 
 
 
 export interface Core {
-
-    tools: Tools;
 
     init: (inputs: Inputs) => Promise<Result<Void, FxError>>;
 
@@ -61,22 +59,17 @@ export interface Core {
     /**
      * create an environment
      */
-    createEnv: (env: EnvMeta, inputs: Inputs) => Promise<Result<Void, FxError>>;
+    createEnv: (inputs: Inputs) => Promise<Result<Void, FxError>>;
 
     /**
      * remove an environment
      */
-    removeEnv: (env: string, inputs: Inputs) => Promise<Result<Void, FxError>>;
+    removeEnv: (inputs: Inputs) => Promise<Result<Void, FxError>>;
 
     /**
      * switch environment
      */
-    switchEnv: (env: string, inputs: Inputs) => Promise<Result<Void, FxError>>;
-
-    /**
-     * switch environment
-     */
-    listEnvs: (inputs: Inputs) => Promise<Result<EnvMeta[], FxError>>;
+    switchEnv: (inputs: Inputs) => Promise<Result<Void, FxError>>;
 
     /**
      * get question model for lifecycle {@link Task} (create, provision, deploy, debug, publish), Questions are organized as a tree. Please check {@link QTreeNode}.

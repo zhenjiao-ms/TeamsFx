@@ -107,6 +107,25 @@ export async function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(backendExtensionsInstallCmd);
 
+   
+  const createEnv = vscode.commands.registerCommand(
+    "fx-extension.createEnv",
+    handlers.createEnvHandler
+  );
+  context.subscriptions.push(createEnv);
+
+  const removeEnv = vscode.commands.registerCommand(
+    "fx-extension.removeEnv",
+    handlers.removeEnvHandler
+  );
+  context.subscriptions.push(removeEnv);
+
+  const switchEnv = vscode.commands.registerCommand(
+    "fx-extension.switchEnv",
+    handlers.switchEnvHandler
+  );
+  context.subscriptions.push(switchEnv);
+
   // 1.10 Register teamsfx task provider
   const taskProvider: TeamsfxTaskProvider = new TeamsfxTaskProvider();
   context.subscriptions.push(

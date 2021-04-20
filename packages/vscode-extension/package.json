@@ -130,8 +130,8 @@
         "title": "TeamsFx - Create Environment"
       },
       {
-        "command": "fx-extension.deleteEnv",
-        "title": "TeamsFx - Delete Environment"
+        "command": "fx-extension.removeEnv",
+        "title": "TeamsFx - Remove Environment"
       },
       {
         "command": "fx-extension.switchEnv",

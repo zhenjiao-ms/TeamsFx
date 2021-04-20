@@ -27,6 +27,7 @@ import {
   SolutionAllContext,
   FunctionRouter,
   SolutionScaffoldResult,
+  OptionItem,
 } from "fx-api";
 import { hooks } from "@feathersjs/hooks";
 import { writeConfigMW } from "./middlewares/config";
@@ -35,7 +36,7 @@ import * as error from "./error";
 import { CoreContext } from "./context";
 import { DefaultSolution } from "../plugins/solution/default";
 import { initFolder, mergeDict, replaceTemplateVariable } from "./tools";
-import { CoreQuestionNames, QuestionAppName, QuestionRootFolder, QuestionSelectSolution } from "./question";
+import { CoreQuestionNames, QuestionAppName, QuestionEnvLocal, QuestionEnvName, QuestionEnvSideLoading, QuestionRootFolder, QuestionSelectEnv, QuestionSelectSolution } from "./question";
 import * as fs from "fs-extra";
 import * as path from "path";
 import { solutionMW } from "./middlewares/solution";
@@ -76,12 +77,13 @@ export class Executor {
     ctx.solutionContext = solutionContext;
     return ok(ctx.projectPath);
   }
-
+   
   @hooks([projectTypeCheckerMW, writeConfigMW])
   static async provision(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
     const provisionConfigs = this.getProvisionConfigs(ctx);
     const solutionContext:SolutionEnvContext = this.getSolutionEnvContext(ctx, provisionConfigs);
     ctx.solutionContext = solutionContext;
+    await new Promise(resolve => setTimeout(resolve, 5000));
     const res = await ctx.solution!.provision(solutionContext, inputs);
     if(res.isOk())
       ctx.variableDict = mergeDict(ctx.variableDict, res.value);
@@ -128,7 +130,15 @@ export class Executor {
     const node = new QTreeNode({ type: NodeType.group });
     const solutionContext = this.getSolutionAllContext(ctx);
     ctx.solutionContext = solutionContext;
-    if (task === Task.create) {
+    if(task === Task.createEnv){
+      node.addChild(new QTreeNode(QuestionEnvName));
+      node.addChild(new QTreeNode(QuestionEnvLocal));
+      node.addChild(new QTreeNode(QuestionEnvSideLoading));
+    }
+    else if (task === Task.removeEnv || task === Task.switchEnv){
+      node.addChild(new QTreeNode(QuestionSelectEnv));
+    }
+    else if (task === Task.create) {
       node.addChild(new QTreeNode(QuestionAppName));
       //make sure that global solutions are loaded
       const solutionNames: string[] = [];
@@ -158,7 +168,7 @@ export class Executor {
         const child = res.value as QTreeNode;
         if (child.data) node.addChild(child);
       }
-    }
+    } 
     return ok(node);
   }
 
@@ -215,6 +225,25 @@ export class Executor {
         if (!func.params) return ok(undefined);
         return await this.validateFolder(func.params as string, inputs);
       }
+      else if (func.method === "listEnv") {
+        const options:OptionItem[] = [];
+        for(const k of Object.keys(ctx.projectSetting.environments)){
+          const envMeta = ctx.projectSetting.environments[k];
+          options.push({
+            id: envMeta.name,
+            label: envMeta.name,
+            description: `local:${envMeta.local}, sideloading:${envMeta.sideloading}`
+          });
+        }
+        return ok(options);
+      }
+      else if (func.method === "validateEnvName") {
+        const envName = func.params as string;
+        if(ctx.projectSetting.environments[envName])
+          return ok(`enviroment already exist!`);
+        else 
+          return ok(undefined);
+      }
     } else {
       const solutionName = array[0];
       const solution = ctx.globalSolutions.get(solutionName);
@@ -234,7 +263,11 @@ export class Executor {
   }
   
   @hooks([projectTypeCheckerMW, writeConfigMW])
-  static async createEnv(ctx: CoreContext, env: EnvMeta, inputs: Inputs): Promise<Result<Void, FxError>> {
+  static async createEnv(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
+    const EnvName = inputs[CoreQuestionNames.EnvName] as string;
+    const EnvLocal = inputs[CoreQuestionNames.EnvLocal] as string;
+    const EnvSideLoading = inputs[CoreQuestionNames.EnvSideLoading] as string;
+    const env:EnvMeta= {name:EnvName, local: EnvLocal === "true", sideloading: EnvSideLoading === "true"};
     const existing = ctx.projectSetting.environments[env.name];
     if(!existing){
       ctx.projectSetting.environments[env.name] = env;
@@ -244,20 +277,27 @@ export class Executor {
   }
 
   @hooks([projectTypeCheckerMW, writeConfigMW])
-  static async removeEnv( ctx: CoreContext, env: string, inputs: Inputs): Promise<Result<Void, FxError>> {
-    const existing = ctx.projectSetting.environments[env];
+  static async removeEnv( ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
+    const EnvName = inputs[CoreQuestionNames.EnvName] as string;
+    if(EnvName === ctx.projectSetting.currentEnv)
+      return err(new UserError("RemoveEnvFail", "current environment can not be removed!", "core"));
+    const existing = ctx.projectSetting.environments[EnvName];
     if(existing){
-      delete ctx.projectSetting.environments[env];
+      delete ctx.projectSetting.environments[EnvName];
+      ctx.variableDict = undefined;
       return ok(Void);
     }
     return err(new UserError("EnvNotExist", "EnvNotExist", "core"));
   }
 
   @hooks([projectTypeCheckerMW, writeConfigMW])
-  static async switchEnv( ctx: CoreContext, env: string, inputs: Inputs): Promise<Result<Void, FxError>> {
-    const existing = ctx.projectSetting.environments[env];
+  static async switchEnv( ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
+    const EnvName = inputs[CoreQuestionNames.EnvName] as string;
+    const existing = ctx.projectSetting.environments[EnvName];
     if(existing){
-      ctx.projectSetting.currentEnv = env;
+      const file = `${ctx.projectPath}/.${ConfigFolderName}/${EnvName}.userdata`;
+      ctx.variableDict = (await fs.pathExists(file)) ? await fs.readJSON(file) : {};
+      ctx.projectSetting.currentEnv = EnvName;
       return ok(Void);
     }
     return err(new UserError("EnvNotExist", "EnvNotExist", "core"));

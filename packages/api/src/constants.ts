@@ -28,5 +28,8 @@ export enum Task
     build = "build",
     provision = "provision",
     deploy = "deploy",
-    publish = "publish"
+    publish = "publish",
+    createEnv = "createEnv",
+    removeEnv = "removeEnv",
+    switchEnv = "switchEnv"
 }

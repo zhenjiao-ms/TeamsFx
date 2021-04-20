@@ -44,9 +44,9 @@ export const writeConfigMW: Middleware = async (
         if(ctx.method === "create" && resources && resources.length > 0){
           for(const resource of resources){
             if(coreCtx.provisionTemplates)
-              await fs.writeFile(`${configFolder}\\${envName}.${resource}.provision.tpl.json`, JSON.stringify(coreCtx.provisionTemplates[resource], null, 4));
+              await fs.writeFile(`${configFolder}\\${resource}.provision.tpl.json`, JSON.stringify(coreCtx.provisionTemplates[resource], null, 4));
             if(coreCtx.deployTemplates)
-             await fs.writeFile(`${configFolder}\\${envName}.${resource}.deploy.tpl.json`, JSON.stringify(coreCtx.deployTemplates[resource], null, 4));
+             await fs.writeFile(`${configFolder}\\${resource}.deploy.tpl.json`, JSON.stringify(coreCtx.deployTemplates[resource], null, 4));
           }
         }
     
