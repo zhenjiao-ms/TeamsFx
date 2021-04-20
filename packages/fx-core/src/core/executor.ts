@@ -115,8 +115,7 @@ export class Executor {
 
   @hooks([projectTypeCheckerMW, writeConfigMW])
   static async publish(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
-    const provisionConfigs = this.getProvisionConfigs(ctx);
-    const solutionContext:SolutionEnvContext = this.getSolutionEnvContext(ctx, provisionConfigs);
+    const solutionContext:SolutionAllContext = this.getSolutionAllContext(ctx);
     ctx.solutionContext = solutionContext;
     const res = await ctx.solution!.publish(solutionContext, inputs);
     if(res.isOk())

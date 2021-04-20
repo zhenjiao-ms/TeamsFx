@@ -61,23 +61,20 @@ export interface SolutionPlugin {
     /**
      * publish
      */
-    publish: (ctx: SolutionEnvContext, inputs: Inputs) => Promise<Result<VariableDict, FxError>>;
+    publish: (ctx: SolutionAllContext, inputs: Inputs) => Promise<Result<VariableDict, FxError>>;
 
     /**
-     * get question model for user task in additional to normal lifecycle {@link Task}, for example `Add Resource`, `Add Capabilities`, `Update AAD Permission`, etc
-     * `getQuestionsForUserTask` will router the getQuestions request and dispatch from core--->solution--->resource plugin according to `FunctionRouter`.
+     * get question model for lifecycle {@link Task} (create, provision, deploy, publish), Questions are organized as a tree. Please check {@link QTreeNode}.
      */
     getQuestionsForLifecycleTask: (ctx: SolutionAllContext, task: Task, inputs: Inputs) => Promise<Result<QTreeNode|undefined, FxError>>;
 
     /**
-     * get question model for user task in additional to normal lifecycle {@link Task}, for example `Add Resource`, `Add Capabilities`, `Update AAD Permission`, etc
-     * `getQuestionsForUserTask` will router the getQuestions request and dispatch from core--->solution--->resource plugin according to `FunctionRouter`.
+     * get question model for plugin customized {@link Task}, Questions are organized as a tree. Please check {@link QTreeNode}.
      */
     getQuestionsForUserTask?: (ctx: SolutionAllContext, router: FunctionRouter, inputs: Inputs) => Promise<Result<QTreeNode|undefined, FxError>>;
 
     /**
-     * execute user task in additional to normal lifecycle {@link Task}, for example `Add Resource`, `Add Capabilities`, `Update AAD Permission`, etc
-     * `executeUserTask` will router the execute request and dispatch from core--->solution--->resource plugin according to `FunctionRouter`.
+     * execute user customized {@link Task}, for example `Add Resource`, `Add Capabilities`, etc
      */
     executeUserTask?: (ctx: SolutionAllContext, func:Func, inputs: Inputs) => Promise<Result<unknown, FxError>>;
 

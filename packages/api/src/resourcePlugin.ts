@@ -3,7 +3,7 @@
 "use strict";
   
 import { Result } from "neverthrow"; 
-import { ResourceConfigs, ResourceSetting, ResourceState,Context, VariableDict, EnvMeta, Func, FunctionRouter, FxError, Inputs, QTreeNode, ReadonlyResourceConfig, ReadonlyResourceConfigs, ResourceConfig, ResourceTemplate, Task, TokenProvider, Void } from "./index";
+import { ResourceSetting, ResourceState,Context, VariableDict, EnvMeta, Func, FunctionRouter, FxError, Inputs, QTreeNode, ReadonlyResourceConfig, ReadonlyResourceConfigs, ResourceConfig, ResourceTemplate, Task, TokenProvider, Void, SolutionAllContext } from "./index";
 
 
 export interface ResourceContext extends Context {
@@ -11,6 +11,10 @@ export interface ResourceContext extends Context {
     resourceStates: ResourceState;
 }
 
+export interface ResourceScaffoldResult{
+    provision:ResourceTemplate;
+    deploy:ResourceTemplate
+}
 
 export interface ResourceEnvContext  extends ResourceContext {
     envMeta: EnvMeta;
@@ -31,6 +35,15 @@ export interface ResourceAllContext  extends ResourceContext {
     provisionConfig?: ResourceConfig;
     deployConfig?: ResourceConfig;
 }
+
+export interface ResourceAllContext  extends ResourceContext {
+    envMeta: EnvMeta;
+    tokenProvider: TokenProvider;  
+    provisionConfig?: ResourceConfig;
+    deployConfig?: ResourceConfig;
+}
+
+
  
 export interface ResourcePlugin {
 
@@ -46,7 +59,7 @@ export interface ResourcePlugin {
     /**
      * scaffold a memory version of config template (provision and deploy are seperated)
      */
-    scaffoldResourceTemplate?: (ctx: ResourceContext, inputs: Inputs) => Promise<Result<{provision:ResourceTemplate, deploy:ResourceTemplate}, FxError>>; 
+    scaffoldResourceTemplate?: (ctx: ResourceContext, inputs: Inputs) => Promise<Result<ResourceScaffoldResult, FxError>>; 
     
     /**
      * provision resource to cloud, output variable dictionary data
@@ -61,7 +74,7 @@ export interface ResourcePlugin {
     /**
      * build artifacts
      */
-    build?: (ctx: Context, inputs: Inputs) => Promise<Result<Void, FxError>>;
+    build?: (ctx: ResourceContext, inputs: Inputs) => Promise<Result<Void, FxError>>;
 
     /**
      * deploy resource
@@ -71,24 +84,23 @@ export interface ResourcePlugin {
     /**
      * publish app
      */
-    publish?: (ctx: ResourceEnvContext, inputs: Inputs) => Promise<Result<Void, FxError>>;
+    publish?: (ctx: SolutionAllContext, inputs: Inputs) => Promise<Result<VariableDict, FxError>>;
    
     /**
-     * Declare what user input you need for each {@link task}. Questions are organized as a tree. Please check {@link QTreeNode}.
-     * ctx only exist for non-create task
+     * get question model for lifecycle {@link Task} (create, provision, deploy, publish), Questions are organized as a tree. Please check {@link QTreeNode}.
      */
-    getQuestionsForLifecycleTask?: (ctx: ResourceEnvContext, task: Task, inputs: Inputs) => Promise<Result<QTreeNode|undefined, FxError>>;
+    getQuestionsForLifecycleTask?: (ctx: ResourceAllContext, task: Task, inputs: Inputs) => Promise<Result<QTreeNode|undefined, FxError>>;
 
     /**
-     * get question model for lifecycle {@link Task} (create, provision, deploy, debug, publish), Questions are organized as a tree. Please check {@link QTreeNode}.
+     * get question model for plugin customized {@link Task}, Questions are organized as a tree. Please check {@link QTreeNode}.
      */
-    getQuestionsForUserTask?: (ctx: ResourceEnvContext, router: FunctionRouter, inputs: Inputs) => Promise<Result<QTreeNode | undefined, FxError>>;
+    getQuestionsForUserTask?: (ctx: ResourceAllContext, router: FunctionRouter, inputs: Inputs) => Promise<Result<QTreeNode | undefined, FxError>>;
 
     /**
-     * execute user task in additional to normal lifecycle {@link Task}, for example `Add Resource`, `Add Capabilities`, `Update AAD Permission`, etc
-     * `executeUserTask` will router the execute request and dispatch from core--->solution--->resource plugin according to `FunctionRouter`.
+     * execute user customized {@link Task}, for example `Add Resource`, `Add Capabilities`, etc
+     * `executeUserTask` will router the execute request and dispatch from core--->solution--->resource plugin according to `Func`.
      */
-    executeUserTask?: (ctx: ResourceEnvContext, func:Func, inputs: Inputs) => Promise<Result<unknown, FxError>>;
+    executeUserTask?: (ctx: ResourceAllContext, func:Func, inputs: Inputs) => Promise<Result<unknown, FxError>>;
     
     /**
      * There are three scenarios to use this API in question model:
@@ -97,5 +109,5 @@ export interface ResourcePlugin {
      * 3. validation for `TextInputQuestion`, core,solution plugin or resource plugin can define the validation function in `executeQuestionFlowFunction`.
      * `executeQuestionFlowFunction` will router the execute request from core--->solution--->resource plugin according to `FunctionRouter`.
      */
-     executeQuestionFlowFunction?: (ctx: ResourceEnvContext, func:Func, inputs: Inputs) => Promise<Result<unknown, FxError>>;
+     executeQuestionFlowFunction?: (ctx: ResourceAllContext, func:Func, inputs: Inputs) => Promise<Result<unknown, FxError>>;
 }

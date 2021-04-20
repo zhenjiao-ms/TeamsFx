@@ -25,18 +25,22 @@ export class DefaultSolution implements  SolutionPlugin{
         return ok(Void);
     }
     async provision(ctx: SolutionEnvContext, inputs: Inputs) : Promise<Result<VariableDict, FxError & {result:VariableDict}>>{
+        ctx.logProvider.info(`[solution] provision resource configs: ${JSON.stringify(ctx.resourceConfigs, undefined, 4)}`);
         return ok({
             endpoint:"http://oowww.com",
             provision:true
         });
     }
     async deploy(ctx: SolutionEnvContext, inputs: Inputs) : Promise<Result<VariableDict, FxError & {result:VariableDict}>>{
+        ctx.logProvider.info(`[solution] deploy resource configs: ${JSON.stringify(ctx.resourceConfigs, undefined, 4)}`);
         return ok({
             storagename:"mystorage",
             deploy:true
         });
     }
-    async publish (ctx: SolutionEnvContext, inputs: Inputs) : Promise<Result<Void, FxError>>{
+    async publish (ctx: SolutionAllContext, inputs: Inputs) : Promise<Result<Void, FxError>>{
+        ctx.logProvider.info(`[solution] publish provisionConfigs: ${JSON.stringify(ctx.provisionConfigs, undefined, 4)}`);
+        ctx.logProvider.info(`[solution] publish deployConfigs: ${JSON.stringify(ctx.deployConfigs, undefined, 4)}`);
         ctx.solutionState.publish = true;
         return ok(Void);
     }
