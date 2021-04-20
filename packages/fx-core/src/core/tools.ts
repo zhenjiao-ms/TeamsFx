@@ -97,7 +97,7 @@ export async function initFolder(projectPath:string, appName:string):Promise<Res
 
     await fs.writeFile(
       `${projectPath}/.gitignore`,
-      `node_modules\n/.${ConfigFolderName}/*.env\n/.${ConfigFolderName}/*.userdata\n.DS_Store`
+      `node_modules\n/.${ConfigFolderName}/state.json\n/.${ConfigFolderName}/*.userdata\n.DS_Store`
     );
 
     return ok(Void);
