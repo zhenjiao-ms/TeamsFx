@@ -81,7 +81,7 @@ export class Executor {
   @hooks([projectTypeCheckerMW, writeConfigMW])
   static async provision(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
     const provisionConfigs = this.getProvisionConfigs(ctx);
-    const solutionContext:SolutionEnvContext = this.getSolutionEnvContext(ctx, provisionConfigs);
+    const solutionContext:SolutionEnvContext = this.createSolutionEnvContext(ctx, provisionConfigs);
     ctx.solutionContext = solutionContext;
     await new Promise(resolve => setTimeout(resolve, 5000));
     const res = await ctx.solution!.provision(solutionContext, inputs);
@@ -95,7 +95,7 @@ export class Executor {
   
   @hooks([projectTypeCheckerMW, writeConfigMW])
   static async build(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
-    const solutionContext:SolutionContext = this.getSolutionContext(ctx);
+    const solutionContext:SolutionContext = this.createSolutionContext(ctx);
     ctx.solutionContext = solutionContext;
     const res = await ctx.solution!.build(solutionContext, inputs);
     if(res.isErr()) return err(res.error);
@@ -105,7 +105,7 @@ export class Executor {
   @hooks([projectTypeCheckerMW, writeConfigMW])
   static async deploy(ctx: CoreContext, inputs: Inputs): Promise<Result<VariableDict, FxError>> {
     const deployConfigs = this.getDeployConfigs(ctx);
-    const solutionContext:SolutionEnvContext = this.getSolutionEnvContext(ctx, deployConfigs);
+    const solutionContext:SolutionEnvContext = this.createSolutionEnvContext(ctx, deployConfigs);
     ctx.solutionContext = solutionContext;
     const res = await ctx.solution!.deploy(solutionContext, inputs);
     if(res.isOk())
@@ -117,7 +117,7 @@ export class Executor {
 
   @hooks([projectTypeCheckerMW, writeConfigMW])
   static async publish(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
-    const solutionContext:SolutionAllContext = this.getSolutionAllContext(ctx);
+    const solutionContext:SolutionAllContext = this.createSolutionAllContext(ctx);
     ctx.solutionContext = solutionContext;
     const res = await ctx.solution!.publish(solutionContext, inputs);
     if(res.isOk())
@@ -128,7 +128,7 @@ export class Executor {
   @hooks([projectTypeCheckerMW])
   static async getQuestionsForLifecycleTask( ctx: CoreContext, task:Task, inputs: Inputs): Promise<Result<QTreeNode | undefined, FxError>> {
     const node = new QTreeNode({ type: NodeType.group });
-    const solutionContext = this.getSolutionAllContext(ctx);
+    const solutionContext = this.createSolutionAllContext(ctx);
     ctx.solutionContext = solutionContext;
     if(task === Task.createEnv){
       node.addChild(new QTreeNode(QuestionEnvName));
@@ -180,7 +180,7 @@ export class Executor {
       const solutionName = array[0];
       const solution = ctx.globalSolutions.get(solutionName);
       if (solution && solution.getQuestionsForUserTask) {
-        const solutionContext = this.getSolutionAllContext(ctx);
+        const solutionContext = this.createSolutionAllContext(ctx);
         ctx.solutionContext = solutionContext;
         return await solution.getQuestionsForUserTask(solutionContext, router, inputs);
       }
@@ -202,7 +202,7 @@ export class Executor {
       const solutionName = array[0];
       const solution = ctx.globalSolutions.get(solutionName);
       if (solution && solution.executeUserTask) {
-        const solutionContext = this.getSolutionAllContext(ctx);
+        const solutionContext = this.createSolutionAllContext(ctx);
         ctx.solutionContext = solutionContext;
         return await solution.executeUserTask(solutionContext, func, inputs);
       }
@@ -248,7 +248,7 @@ export class Executor {
       const solutionName = array[0];
       const solution = ctx.globalSolutions.get(solutionName);
       if (solution && solution.executeQuestionFlowFunction) {
-        const solutionContext = this.getSolutionAllContext(ctx);
+        const solutionContext = this.createSolutionAllContext(ctx);
         ctx.solutionContext = solutionContext;
         return await solution.executeQuestionFlowFunction(solutionContext, func, inputs);
       }
@@ -361,7 +361,7 @@ export class Executor {
     return ok(undefined);
   }
 
-  static getSolutionContext(ctx: CoreContext):SolutionContext{
+  static createSolutionContext(ctx: CoreContext):SolutionContext{
     const solutionContext:SolutionContext = {
       projectPath: ctx.projectPath,
       ui: ctx.ui,
@@ -375,10 +375,10 @@ export class Executor {
     return solutionContext;
   }
 
-  static getSolutionEnvContext(ctx: CoreContext, resourceConfigs: ResourceConfigs):SolutionEnvContext{
+  static createSolutionEnvContext(ctx: CoreContext, resourceConfigs: ResourceConfigs):SolutionEnvContext{
     const envMeta = ctx.projectSetting.environments[ctx.projectSetting.currentEnv];
     const solutionContext:SolutionEnvContext = {
-      ...this.getSolutionContext(ctx),
+      ...this.createSolutionContext(ctx),
       env: envMeta,
       tokenProvider: ctx.tokenProvider,
       resourceConfigs: resourceConfigs
@@ -386,13 +386,13 @@ export class Executor {
     return solutionContext;
   }
 
-  static getSolutionAllContext(ctx: CoreContext):SolutionAllContext{
+  static createSolutionAllContext(ctx: CoreContext):SolutionAllContext{
     // build SolutionAllContext
     const provisionConfigs = this.getProvisionConfigs(ctx);
     const deployConfigs = this.getDeployConfigs(ctx);
     const envMeta = ctx.projectSetting.environments[ctx.projectSetting.currentEnv];
     const solutionContext:SolutionAllContext = {
-      ...this.getSolutionContext(ctx),
+      ...this.createSolutionContext(ctx),
       env: envMeta,
       tokenProvider: ctx.tokenProvider,
       provisionConfigs: provisionConfigs,
