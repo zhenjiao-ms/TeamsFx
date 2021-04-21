@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 import { exec } from "child_process";
 import * as fs from "fs-extra";
-import { Dict, Json, Void, ConfigFolderName, ok, Result, FxError, err, ResourceTemplate, VariableDict } from "fx-api";
+import { Dict, Json, Void, ConfigFolderName, ok, Result, FxError, err, ResourceTemplate, ResourceInstanceValues } from "fx-api";
 import { promisify } from "util";
 import * as error from "./error";
 import Mustache from "mustache";
@@ -31,7 +31,7 @@ export async function ensureUniqueFolder(folderPath: string): Promise<string> {
   return testFolder;
 }
  
-export function replaceTemplateVariable(resourceTemplate:ResourceTemplate, dict?: VariableDict): void {
+export function replaceTemplateVariable(resourceTemplate:ResourceTemplate, dict?: ResourceInstanceValues): void {
   if(!dict) return ;
   Mustache.escape = function(text) {return text;};
   for (const key of Object.keys(resourceTemplate)) {
@@ -106,9 +106,9 @@ export async function initFolder(projectPath:string, appName:string):Promise<Res
   }
 }
 
-export function mergeDict(varDict1?:VariableDict, varDict2?:VariableDict):VariableDict{
+export function mergeDict(varDict1?:ResourceInstanceValues, varDict2?:ResourceInstanceValues):ResourceInstanceValues{
   if(!varDict1 && !varDict2) return {};
-  const res:VariableDict = {};
+  const res:ResourceInstanceValues = {};
   if(varDict1){
     for(const k of Object.keys(varDict1)){
       res[k] = varDict1[k];

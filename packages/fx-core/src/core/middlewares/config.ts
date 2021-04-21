@@ -51,10 +51,10 @@ export const writeConfigMW: Middleware = async (
         }
     
         //env.userdata
-        const varDict = coreCtx.variableDict;
-        if(varDict){
-          await fs.writeFile(`${configFolder}\\${envName}.userdata`, JSON.stringify(varDict, null, 4));
-        }
+        if(coreCtx.resourceInstanceValues)
+          await fs.writeFile(`${configFolder}\\${envName}.userdata.json`, JSON.stringify(coreCtx.resourceInstanceValues, null, 4));
+        if(coreCtx.stateValues)
+          await fs.writeFile(`${configFolder}\\${envName}.state.json`, JSON.stringify(coreCtx.stateValues, null, 4));
       } catch (e) {
         ctx.result = err(error.WriteFileError(e));
       }

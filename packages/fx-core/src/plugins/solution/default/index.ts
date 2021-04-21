@@ -1,4 +1,4 @@
-import { Func, FunctionRouter, FxError, Inputs, ok, QTreeNode, ResourceTemplates, Result, SolutionAllContext, SolutionContext, SolutionEnvContext, SolutionPlugin, Task, VariableDict, Void } from "fx-api";
+import { Func, FunctionRouter, FxError, Inputs, ok, QTreeNode, ResourceTemplates, Result, SolutionAllContext, SolutionContext, SolutionEnvContext, SolutionPlugin, Task, ResourceInstanceValues, Void, ResourceEnvResult } from "fx-api";
 
 
 export class DefaultSolution implements  SolutionPlugin{
@@ -24,25 +24,33 @@ export class DefaultSolution implements  SolutionPlugin{
         ctx.solutionState.build = true;
         return ok(Void);
     }
-    async provision(ctx: SolutionEnvContext, inputs: Inputs) : Promise<Result<VariableDict, FxError & {result:VariableDict}>>{
+    async provision(ctx: SolutionEnvContext, inputs: Inputs) : Promise<Result<ResourceEnvResult, FxError & {result:ResourceEnvResult}>>{
         ctx.logProvider.info(`[solution] provision resource configs: ${JSON.stringify(ctx.resourceConfigs)}`);
         return ok({
-            endpoint:"http://oowww.com",
-            provision:true
+            resourceValues:{
+                endpoint:"http://oowww.com"
+            },
+            stateValues: {
+                provision:true
+            }
         });
     }
-    async deploy(ctx: SolutionEnvContext, inputs: Inputs) : Promise<Result<VariableDict, FxError & {result:VariableDict}>>{
+    async deploy(ctx: SolutionEnvContext, inputs: Inputs) : Promise<Result<ResourceEnvResult, FxError & {result:ResourceEnvResult}>>{
         ctx.logProvider.info(`[solution] deploy resource configs: ${JSON.stringify(ctx.resourceConfigs)}`);
         return ok({
-            storagename:"mystorage",
-            deploy:true
+            resourceValues:{
+                storagename:"mystorage"
+            },
+            stateValues:{
+                deploy:true
+            }
         });
     }
-    async publish (ctx: SolutionAllContext, inputs: Inputs) : Promise<Result<Void, FxError>>{
+    async publish (ctx: SolutionAllContext, inputs: Inputs) : Promise<Result<ResourceEnvResult, FxError>>{
         ctx.logProvider.info(`[solution] publish provisionConfigs: ${JSON.stringify(ctx.provisionConfigs)}`);
         ctx.logProvider.info(`[solution] publish deployConfigs: ${JSON.stringify(ctx.deployConfigs)}`);
         ctx.solutionState.publish = true;
-        return ok(Void);
+        return ok({resourceValues:{}, stateValues:{}});
     }
     async getQuestionsForLifecycleTask(ctx: SolutionAllContext, task: Task, inputs: Inputs) : Promise<Result<QTreeNode|undefined, FxError>>{
         return ok(undefined);

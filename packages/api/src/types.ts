@@ -51,7 +51,9 @@ export interface EnvMeta{
     sideloading:boolean
 }
 
-export type VariableDict = Dict<ConfigValue>;
+export type ResourceInstanceValues = Dict<ConfigValue>;
+
+export type StateValues = Dict<ConfigValue>;
 
 /**
  * project static settings

@@ -3,7 +3,7 @@
 "use strict";
 
 import { Result } from "neverthrow";  
-import { Context, SolutionSetting, SolutionState,VariableDict, EnvMeta, Func, FunctionRouter, FxError, Inputs, QTreeNode, ResourceConfigs, ResourceTemplates, Task, TokenProvider, Void } from "./index";
+import { Context, SolutionSetting, SolutionState, EnvMeta, Func, FunctionRouter, FxError, Inputs, QTreeNode, ResourceConfigs, ResourceTemplates, Task, TokenProvider, Void, ResourceInstanceValues, StateValues } from "./index";
 
 
 
@@ -32,6 +32,12 @@ export interface SolutionAllContext extends SolutionContext {
 }
 
 
+export interface ResourceEnvResult {
+    resourceValues: ResourceInstanceValues,
+    stateValues: StateValues
+}
+ 
+
 export interface SolutionPlugin {
     
     name:string,
@@ -51,17 +57,18 @@ export interface SolutionPlugin {
     /**
      * provision will output VariableDict even error happends
      */
-    provision: (ctx: SolutionEnvContext, inputs: Inputs) => Promise<Result<VariableDict, FxError & {result:VariableDict}>>;
+    provision: (ctx: SolutionEnvContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError & {result:ResourceEnvResult}>>;
 
     /**
      * deploy will output VariableDict even error happends
      */
-    deploy: (ctx: SolutionEnvContext, inputs: Inputs) => Promise<Result<VariableDict, FxError & {result:VariableDict}>>;
+    deploy: (ctx: SolutionEnvContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError & {result:ResourceEnvResult}>>;
  
     /**
      * publish
+     * TODO: Just need manifest
      */
-    publish: (ctx: SolutionAllContext, inputs: Inputs) => Promise<Result<VariableDict, FxError>>;
+    publish: (ctx: SolutionAllContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError>>;
 
     /**
      * get question model for lifecycle {@link Task} (create, provision, deploy, publish), Questions are organized as a tree. Please check {@link QTreeNode}.

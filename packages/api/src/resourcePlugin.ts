@@ -3,7 +3,7 @@
 "use strict";
   
 import { Result } from "neverthrow"; 
-import { ResourceSetting, ResourceState,Context, VariableDict, EnvMeta, Func, FunctionRouter, FxError, Inputs, QTreeNode, ReadonlyResourceConfig, ReadonlyResourceConfigs, ResourceConfig, ResourceTemplate, Task, TokenProvider, Void, SolutionAllContext } from "./index";
+import { ResourceSetting, ResourceState,Context, EnvMeta, Func, FunctionRouter, FxError, Inputs, QTreeNode, ReadonlyResourceConfig, ReadonlyResourceConfigs, ResourceConfig, ResourceTemplate, Task, TokenProvider, Void, SolutionAllContext, ResourceInstanceValues, StateValues, ResourceEnvResult } from "./index";
 
 
 export interface ResourceContext extends Context {
@@ -15,6 +15,7 @@ export interface ResourceScaffoldResult{
     provision:ResourceTemplate;
     deploy:ResourceTemplate
 }
+
 
 export interface ResourceEnvContext  extends ResourceContext {
     envMeta: EnvMeta;
@@ -43,7 +44,6 @@ export interface ResourceAllContext  extends ResourceContext {
     deployConfig?: ResourceConfig;
 }
 
-
  
 export interface ResourcePlugin {
 
@@ -64,10 +64,10 @@ export interface ResourcePlugin {
     /**
      * provision resource to cloud, output variable dictionary data
      */
-    provision?: (ctx: ResourceEnvContext, inputs: Inputs) => Promise<Result<VariableDict, FxError>>;
+    provision?: (ctx: ResourceEnvContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError>>;
 
     /**
-     * Configure provisioned resources.
+     * Configure provisioned resources.  TODO:renaming
      */
     configureProvisionedResources?: (ctx: ResourceConfigureContext) => Promise<Result<Void, FxError>>;
 
@@ -77,14 +77,15 @@ export interface ResourcePlugin {
     build?: (ctx: ResourceContext, inputs: Inputs) => Promise<Result<Void, FxError>>;
 
     /**
-     * deploy resource
+     * deploy resource   confirm the output??
      */
-    deploy?: (ctx: ResourceEnvContext, inputs: Inputs) => Promise<Result<VariableDict, FxError>>;
+    deploy?: (ctx: ResourceEnvContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError>>;
 
     /**
-     * publish app
+     * publish app confirm the output??
+     * TODO: Just need manifest
      */
-    publish?: (ctx: SolutionAllContext, inputs: Inputs) => Promise<Result<VariableDict, FxError>>;
+    publish?: (ctx: SolutionAllContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError>>;
    
     /**
      * get question model for lifecycle {@link Task} (create, provision, deploy, publish), Questions are organized as a tree. Please check {@link QTreeNode}.

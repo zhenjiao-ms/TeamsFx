@@ -13,13 +13,10 @@ import {
   returnUserError,
   UserError,
   SingleSelectQuestion,
-  StringValidation,
   ConfigFolderName,
   Inputs,
-  SystemError,
   SolutionContext,
   Void,
-  VariableDict,
   EnvMeta,
   SolutionEnvContext,
   ResourceConfigs,
@@ -28,6 +25,7 @@ import {
   FunctionRouter,
   SolutionScaffoldResult,
   OptionItem,
+  ResourceEnvResult,
 } from "fx-api";
 import { hooks } from "@feathersjs/hooks";
 import { writeConfigMW } from "./middlewares/config";
@@ -39,7 +37,6 @@ import { initFolder, mergeDict, replaceTemplateVariable } from "./tools";
 import { CoreQuestionNames, QuestionAppName, QuestionEnvLocal, QuestionEnvName, QuestionEnvSideLoading, QuestionRootFolder, QuestionSelectEnv, QuestionSelectSolution } from "./question";
 import * as fs from "fs-extra";
 import * as path from "path";
-import { solutionMW } from "./middlewares/solution";
 
 
 export class Executor {
@@ -85,10 +82,15 @@ export class Executor {
     ctx.solutionContext = solutionContext;
     await new Promise(resolve => setTimeout(resolve, 5000));
     const res = await ctx.solution!.provision(solutionContext, inputs);
-    if(res.isOk())
-      ctx.variableDict = mergeDict(ctx.variableDict, res.value);
-    else
-      ctx.variableDict = mergeDict(ctx.variableDict, res.error.result);
+    let result:ResourceEnvResult|undefined;
+    if(res.isOk()){
+      result = res.value;
+    }
+    else {
+      result = res.error.result;
+    }
+    ctx.resourceInstanceValues = mergeDict(ctx.resourceInstanceValues, result.resourceValues);
+    ctx.stateValues = mergeDict(ctx.stateValues, result.stateValues);
     return res.isOk() ? ok(Void) : err(res.error);
   }
 
@@ -103,15 +105,20 @@ export class Executor {
   }
 
   @hooks([projectTypeCheckerMW, writeConfigMW])
-  static async deploy(ctx: CoreContext, inputs: Inputs): Promise<Result<VariableDict, FxError>> {
+  static async deploy(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
     const deployConfigs = this.getDeployConfigs(ctx);
     const solutionContext:SolutionEnvContext = this.createSolutionEnvContext(ctx, deployConfigs);
     ctx.solutionContext = solutionContext;
     const res = await ctx.solution!.deploy(solutionContext, inputs);
-    if(res.isOk())
-      ctx.variableDict = mergeDict(ctx.variableDict, res.value);
-    else 
-      ctx.variableDict = mergeDict(ctx.variableDict, res.error.result);
+    let result:ResourceEnvResult|undefined;
+    if(res.isOk()){
+      result = res.value;
+    }
+    else {
+      result = res.error.result;
+    }
+    ctx.resourceInstanceValues = mergeDict(ctx.resourceInstanceValues, result.resourceValues);
+    ctx.stateValues = mergeDict(ctx.stateValues, result.stateValues);
     return res.isOk() ? ok(Void) : err(res.error);
   }
 
@@ -120,8 +127,10 @@ export class Executor {
     const solutionContext:SolutionAllContext = this.createSolutionAllContext(ctx);
     ctx.solutionContext = solutionContext;
     const res = await ctx.solution!.publish(solutionContext, inputs);
-    if(res.isOk())
-      ctx.variableDict = mergeDict(ctx.variableDict, res.value);
+    if(res.isOk()){
+      ctx.resourceInstanceValues = mergeDict(ctx.resourceInstanceValues, res.value.resourceValues);
+      ctx.stateValues = mergeDict(ctx.stateValues, res.value.stateValues);
+    }
     return res.isOk() ? ok(Void) : err(res.error);
   }
 
@@ -284,7 +293,7 @@ export class Executor {
     const existing = ctx.projectSetting.environments[EnvName];
     if(existing){
       delete ctx.projectSetting.environments[EnvName];
-      ctx.variableDict = undefined;
+      ctx.resourceInstanceValues = undefined;
       return ok(Void);
     }
     return err(new UserError("EnvNotExist", "EnvNotExist", "core"));
@@ -296,7 +305,7 @@ export class Executor {
     const existing = ctx.projectSetting.environments[EnvName];
     if(existing){
       const file = `${ctx.projectPath}/.${ConfigFolderName}/${EnvName}.userdata`;
-      ctx.variableDict = (await fs.pathExists(file)) ? await fs.readJSON(file) : {};
+      ctx.resourceInstanceValues = (await fs.pathExists(file)) ? await fs.readJSON(file) : {};
       ctx.projectSetting.currentEnv = EnvName;
       return ok(Void);
     }
@@ -322,7 +331,7 @@ export class Executor {
         if(ctx.provisionTemplates){
           const resourceTemplate = ctx.provisionTemplates[resource];
           if(resourceTemplate){
-            replaceTemplateVariable(resourceTemplate, ctx.variableDict);
+            replaceTemplateVariable(resourceTemplate, ctx.resourceInstanceValues);
             provisionConfigs[resource] = resourceTemplate;
           }
         }
@@ -339,7 +348,7 @@ export class Executor {
         if(ctx.deployTemplates){
           const resourceTemplate = ctx.deployTemplates[resource];
           if(resourceTemplate){
-            replaceTemplateVariable(resourceTemplate, ctx.variableDict);
+            replaceTemplateVariable(resourceTemplate, ctx.resourceInstanceValues);
             deployConfigs[resource] = resourceTemplate;
           }
         }

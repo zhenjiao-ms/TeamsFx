@@ -24,7 +24,8 @@ import {
   ProjectState,
   ResourceTemplates,
   ResourceTemplate,
-  VariableDict
+  ResourceInstanceValues,
+  StateValues
 } from "fx-api";
 import { hooks } from "@feathersjs/hooks";
 import { concurrentMW } from "./middlewares/concurrent";
@@ -94,10 +95,16 @@ export class FxCore implements Core {
           deployTemplates[resource] = deployTempalte;
         }
       }
-      const userDataPath = `${projectPath}\\.${ConfigFolderName}\\${envName}.userdata`;
-      let varDict:VariableDict|undefined = undefined;
-      if(await fs.pathExists(userDataPath)){
-        varDict = await fs.readJson(userDataPath);
+      const resourceValueFile = `${projectPath}\\.${ConfigFolderName}\\${envName}.userdata.json`;
+      let resourceInstanceValues:ResourceInstanceValues|undefined = undefined;
+      if(await fs.pathExists(resourceValueFile)){
+        resourceInstanceValues = await fs.readJson(resourceValueFile);
+      }
+
+      const stateValueFile = `${projectPath}\\.${ConfigFolderName}\\${envName}.state.json`;
+      let stateValues:StateValues|undefined = undefined;
+      if(await fs.pathExists(stateValueFile)){
+        stateValues = await fs.readJson(stateValueFile);
       }
       const coreCtx: CoreContext = {
         projectPath: projectPath,
@@ -106,7 +113,8 @@ export class FxCore implements Core {
         solution: new DefaultSolution(),
         provisionTemplates: privisionTemplates,
         deployTemplates: deployTemplates,
-        variableDict: varDict,
+        resourceInstanceValues: resourceInstanceValues,
+        stateValues: stateValues,
         globalSolutions: this.globalSolutions,
         ... GlobalTools
       };

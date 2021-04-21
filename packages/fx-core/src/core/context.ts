@@ -1,4 +1,4 @@
-import { Context,ResourceTemplates, SolutionContext, SolutionPlugin, TokenProvider, VariableDict} from "fx-api";
+import { Context,ResourceTemplates, SolutionContext, SolutionPlugin, TokenProvider, ResourceInstanceValues, StateValues} from "fx-api";
 
 
 export interface CoreContext extends Context{
@@ -11,7 +11,9 @@ export interface CoreContext extends Context{
 
     deployTemplates?: ResourceTemplates;
 
-    variableDict?: VariableDict;
+    resourceInstanceValues?: ResourceInstanceValues;
+
+    stateValues?: StateValues;
 
     tokenProvider: TokenProvider;
 
