@@ -97,8 +97,8 @@ export function genBotSectionInManifest(botId: string): string {
                 scopes: ["personal", "team", "groupchat"],
                 commands: [
                     {
-                        title: "bot command title",
-                        description: "bot command description"
+                        title: "intro",
+                        description: "Introduction and user guide for this Bot"
                     }
                 ]
             }
