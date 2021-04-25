@@ -7,13 +7,12 @@ import { ProgrammingLanguage } from "./enums/programmingLanguage";
 
 export class RegularExprs {
     public static readonly NORMAL_NAME: RegExp = /^[a-zA-Z0-9\-]{2,60}$/;
-    public static readonly BOT_ID: RegExp = /^[a-z0-9\-]{36}$/;
-    public static readonly BOT_PASSWORD: RegExp = /^[a-zA-Z0-9\.\-_~]{34}$/;
     public static readonly CHARS_TO_BE_SKIPPED: RegExp = /[^a-zA-Z0-9]/g;
 }
 
 export class WebAppConstants {
     public static readonly WEB_APP_SITE_DOMAIN: string = "azurewebsites.net";
+    public static readonly APP_SERVICE_PLAN_DEFAULT_SKU_NAME = "F1";
 }
 
 export class AADRegistrationConstants {

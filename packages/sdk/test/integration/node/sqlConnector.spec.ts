@@ -7,6 +7,7 @@ import * as msRestNodeAuth from "@azure/ms-rest-nodeauth";
 import chaiPromises from "chai-as-promised";
 import { Connection, Request } from "tedious";
 import { loadConfiguration, DefaultTediousConnectionConfiguration } from "../../../src";
+import {MockEnvironmentVariable, RestoreEnvironmentVariable} from "../../helper";
 
 chaiUse(chaiPromises);
 
@@ -17,10 +18,11 @@ describe("SQL Connector Test: Node", () => {
   // let sqlName: string | undefined;
   // let subscriptionId: string | undefined;
   before(async () => {
+    MockEnvironmentVariable();
     loadConfiguration();
-    // resourceGroup = process.env.RESOURCE_GROUP_NAME;
-    // subscriptionId = process.env.TEST_ACCOUNT_SUBSCRIPTION_ID;
-    // const sqlEndpoint: string | undefined = process.env.SQL_ENDPOINT;
+    // resourceGroup = process.env.SDK_INTEGRATION_RESOURCE_GROUP_NAME;
+    // subscriptionId = process.env.SDK_INTEGRATION_TEST_ACCOUNT_SUBSCRIPTION_ID;
+    // const sqlEndpoint: string | undefined = process.env.SDK_INTEGRATION_SQL_ENDPOINT;
     // sqlName = sqlEndpoint!.slice(0, sqlEndpoint!.indexOf("."));
 
     // const tokenCredential = await getSQLManagerClient();
@@ -28,13 +30,14 @@ describe("SQL Connector Test: Node", () => {
     // await addLocalFirewall(sqlManagerClient, resourceGroup!, sqlName!);
   });
   after(async () => {
+    RestoreEnvironmentVariable();
     // await clearUpLocalFirewall(sqlManagerClient, resourceGroup!, sqlName!);
   });
   it("Test SQL local connect success", async function() {
     connection = await getSQLConnection();
     const query = "select system_user as u, sysdatetime() as t";
     const result = await execQuery(query, connection);
-    const userName = process.env.SQL_USER_NAME;
+    const userName = process.env.SDK_INTEGRATION_SQL_USER_NAME;
     assert.isNotNull(result);
     assert.isArray(result);
     assert.strictEqual(result![0]![0], userName);
@@ -47,8 +50,8 @@ const echoIpAddress = "https://api.ipify.org";
 const localRule = "FirewallAllowLocalIP";
 
 async function getSQLManagerClient(): Promise<msRestNodeAuth.UserTokenCredentials | undefined> {
-  const username: string | undefined = process.env.TEST_ACCOUNT_NAME;
-  const password: string | undefined = process.env.TEST_ACCOUNT_PASSWORD;
+  const username: string | undefined = process.env.SDK_INTEGRATION_TEST_ACCOUNT_NAME;
+  const password: string | undefined = process.env.SDK_INTEGRATION_TEST_ACCOUNT_PASSWORD;
   const authres = await msRestNodeAuth.loginWithUsernamePassword(username!, password!);
   return authres;
 }

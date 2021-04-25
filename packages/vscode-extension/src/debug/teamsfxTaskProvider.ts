@@ -6,8 +6,11 @@ import * as vscode from "vscode";
 import * as constants from "./constants";
 import * as commonUtils from "./commonUtils";
 import { ProductName, VsCodeEnv } from "fx-api";
-import { dotnetChecker } from "./depsChecker/dotnetChecker";
+import { DotnetChecker } from "./depsChecker/dotnetChecker";
 import { detectVsCodeEnv } from "../handlers";
+import { vscodeAdapter } from "./depsChecker/vscodeAdapter";
+import { vscodeLogger } from "./depsChecker/vscodeLogger";
+import { vscodeTelemetry } from "./depsChecker/vscodeTelemetry";
 
 export class TeamsfxTaskProvider implements vscode.TaskProvider {
   public static readonly type: string = ProductName;
@@ -133,6 +136,7 @@ export class TeamsfxTaskProvider implements vscode.TaskProvider {
     const command: string = constants.authStartCommand;
     definition = definition || { type: TeamsfxTaskProvider.type, command };
 
+    const dotnetChecker = new DotnetChecker(vscodeAdapter, vscodeLogger, vscodeTelemetry);
     const dotnetPath = await dotnetChecker.getDotnetExecPath();
 
     const env = await commonUtils.getAuthLocalEnv();
@@ -160,7 +164,12 @@ export class TeamsfxTaskProvider implements vscode.TaskProvider {
   ): Promise<vscode.Task> {
     const command: string = constants.ngrokStartCommand;
     definition = definition || { type: TeamsfxTaskProvider.type, command };
-    const commandLine = "npx ngrok http 3978";
+    let commandLine = "npx ngrok http 3978";
+    const skipNgrokConfig = await commonUtils.getSkipNgrokConfig();
+    const skipNgrok = skipNgrokConfig && skipNgrokConfig.trim().toLocaleLowerCase() === "true";
+    if (skipNgrok) {
+      commandLine = "echo 'Do not start ngrok, but use predefined bot endpoint.'";
+    }
     const options: vscode.ShellExecutionOptions = {
       cwd: projectRoot,
     };
@@ -172,7 +181,7 @@ export class TeamsfxTaskProvider implements vscode.TaskProvider {
       new vscode.ShellExecution(commandLine, options),
       constants.ngrokProblemMatcher
     );
-    task.isBackground = true;
+    task.isBackground = !skipNgrok;
     return task;
   }
 
