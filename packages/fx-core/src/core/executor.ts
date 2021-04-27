@@ -66,7 +66,7 @@ export class Executor {
     if(initRes.isErr()) return err(initRes.error);
     
     // scaffold
-    const scaffoldRes = await ctx.solution.scaffold(solutionContext, inputs);
+    const scaffoldRes = await ctx.solution.scaffoldFiles(solutionContext, inputs);
     if(scaffoldRes.isErr()) return err(scaffoldRes.error);
     const templates:SolutionScaffoldResult = scaffoldRes.value;
     ctx.deployTemplates = templates.deployTemplates;
@@ -76,12 +76,12 @@ export class Executor {
   }
    
   @hooks([projectTypeCheckerMW, writeConfigMW])
-  static async provision(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
+  static async provisionResources(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
     const provisionConfigs = this.getProvisionConfigs(ctx);
     const solutionContext:SolutionEnvContext = this.createSolutionEnvContext(ctx, provisionConfigs);
     ctx.solutionContext = solutionContext;
     await new Promise(resolve => setTimeout(resolve, 5000));
-    const res = await ctx.solution!.provision(solutionContext, inputs);
+    const res = await ctx.solution!.provisionResources(solutionContext, inputs);
     let result:ResourceEnvResult|undefined;
     if(res.isOk()){
       result = res.value;
@@ -96,20 +96,20 @@ export class Executor {
 
   
   @hooks([projectTypeCheckerMW, writeConfigMW])
-  static async build(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
+  static async buildArtifacts(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
     const solutionContext:SolutionContext = this.createSolutionContext(ctx);
     ctx.solutionContext = solutionContext;
-    const res = await ctx.solution!.build(solutionContext, inputs);
+    const res = await ctx.solution!.buildArtifacts(solutionContext, inputs);
     if(res.isErr()) return err(res.error);
     return ok(Void);
   }
 
   @hooks([projectTypeCheckerMW, writeConfigMW])
-  static async deploy(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
+  static async deployArtifacts(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
     const deployConfigs = this.getDeployConfigs(ctx);
     const solutionContext:SolutionEnvContext = this.createSolutionEnvContext(ctx, deployConfigs);
     ctx.solutionContext = solutionContext;
-    const res = await ctx.solution!.deploy(solutionContext, inputs);
+    const res = await ctx.solution!.deployArtifacts(solutionContext, inputs);
     let result:ResourceEnvResult|undefined;
     if(res.isOk()){
       result = res.value;
@@ -123,10 +123,10 @@ export class Executor {
   }
 
   @hooks([projectTypeCheckerMW, writeConfigMW])
-  static async publish(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
+  static async publishApplication(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {
     const solutionContext:SolutionAllContext = this.createSolutionAllContext(ctx);
     ctx.solutionContext = solutionContext;
-    const res = await ctx.solution!.publish(solutionContext, inputs);
+    const res = await ctx.solution!.publishApplication(solutionContext, inputs);
     if(res.isOk()){
       ctx.resourceInstanceValues = mergeDict(ctx.resourceInstanceValues, res.value.resourceValues);
       ctx.stateValues = mergeDict(ctx.stateValues, res.value.stateValues);

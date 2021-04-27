@@ -4,7 +4,7 @@ import { Func, FunctionRouter, FxError, Inputs, ok, QTreeNode, ResourceTemplates
 export class DefaultSolution implements  SolutionPlugin{
     name = "fx-solution-default";
     displayName = "Default Solution";
-    async scaffold (ctx: SolutionContext, inputs: Inputs) : Promise<Result<{provisionTemplates:ResourceTemplates, deployTemplates: ResourceTemplates}, FxError>>
+    async scaffoldFiles (ctx: SolutionContext, inputs: Inputs) : Promise<Result<{provisionTemplates:ResourceTemplates, deployTemplates: ResourceTemplates}, FxError>>
     {
         ctx.solutionSetting.resources = ["fx-resource-frontend"];
         return ok({
@@ -20,11 +20,11 @@ export class DefaultSolution implements  SolutionPlugin{
             }
         });
     }
-    async build(ctx: SolutionContext, inputs: Inputs) : Promise<Result<Void, FxError>>{
+    async buildArtifacts(ctx: SolutionContext, inputs: Inputs) : Promise<Result<Void, FxError>>{
         ctx.solutionState.build = true;
         return ok(Void);
     }
-    async provision(ctx: SolutionEnvContext, inputs: Inputs) : Promise<Result<ResourceEnvResult, FxError & {result:ResourceEnvResult}>>{
+    async provisionResources(ctx: SolutionEnvContext, inputs: Inputs) : Promise<Result<ResourceEnvResult, FxError & {result:ResourceEnvResult}>>{
         ctx.logProvider.info(`[solution] provision resource configs: ${JSON.stringify(ctx.resourceConfigs)}`);
         return ok({
             resourceValues:{
@@ -35,7 +35,7 @@ export class DefaultSolution implements  SolutionPlugin{
             }
         });
     }
-    async deploy(ctx: SolutionEnvContext, inputs: Inputs) : Promise<Result<ResourceEnvResult, FxError & {result:ResourceEnvResult}>>{
+    async deployArtifacts(ctx: SolutionEnvContext, inputs: Inputs) : Promise<Result<ResourceEnvResult, FxError & {result:ResourceEnvResult}>>{
         ctx.logProvider.info(`[solution] deploy resource configs: ${JSON.stringify(ctx.resourceConfigs)}`);
         return ok({
             resourceValues:{
@@ -46,7 +46,7 @@ export class DefaultSolution implements  SolutionPlugin{
             }
         });
     }
-    async publish (ctx: SolutionAllContext, inputs: Inputs) : Promise<Result<ResourceEnvResult, FxError>>{
+    async publishApplication (ctx: SolutionAllContext, inputs: Inputs) : Promise<Result<ResourceEnvResult, FxError>>{
         ctx.logProvider.info(`[solution] publish provisionConfigs: ${JSON.stringify(ctx.provisionConfigs)}`);
         ctx.logProvider.info(`[solution] publish deployConfigs: ${JSON.stringify(ctx.deployConfigs)}`);
         ctx.solutionState.publish = true;

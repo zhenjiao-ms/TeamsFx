@@ -137,7 +137,7 @@ export class FxCore implements Core {
   }
   
   @hooks([errorHandlerMW])
-  public async create(inputs: Inputs): Promise<Result<string, FxError>> {
+  public async createProject(inputs: Inputs): Promise<Result<string, FxError>> {
     const coreContext = this.buildCleanCoreContext();
     const appName = inputs[CoreQuestionNames.AppName] as string;
     const folder = inputs[CoreQuestionNames.Foler] as string;
@@ -170,28 +170,28 @@ export class FxCore implements Core {
   }
 
   @hooks([errorHandlerMW, concurrentMW])
-  public async provision(inputs: Inputs): Promise<Result<Void, FxError>> {
+  public async provisionResources(inputs: Inputs): Promise<Result<Void, FxError>> {
     const coreContext = await this.loadCoreContext(inputs.projectPath);
     coreContext.tokenProvider = GlobalTools.tokenProvider;
-    return await Executor.provision(coreContext, inputs);
+    return await Executor.provisionResources(coreContext, inputs);
   }
 
   @hooks([errorHandlerMW, concurrentMW])
-  public async build(inputs: Inputs) : Promise<Result<Void, FxError>>{
+  public async buildArtifacts(inputs: Inputs) : Promise<Result<Void, FxError>>{
     const coreContext = await this.loadCoreContext(inputs.projectPath);
-    return await Executor.build(coreContext, inputs);
+    return await Executor.buildArtifacts(coreContext, inputs);
   }
 
   @hooks([errorHandlerMW, concurrentMW])
-  public async deploy(inputs: Inputs): Promise<Result<Void, FxError>> {
+  public async deployArtifacts(inputs: Inputs): Promise<Result<Void, FxError>> {
     const coreContext = await this.loadCoreContext(inputs.projectPath);
-    return await Executor.deploy(coreContext, inputs);
+    return await Executor.deployArtifacts(coreContext, inputs);
   }
 
   @hooks([errorHandlerMW, concurrentMW])
-  public async publish(inputs: Inputs): Promise<Result<Void, FxError>> {
+  public async publishApplication(inputs: Inputs): Promise<Result<Void, FxError>> {
     const coreContext = await this.loadCoreContext(inputs.projectPath);
-    return await Executor.publish(coreContext, inputs);
+    return await Executor.publishApplication(coreContext, inputs);
   }
 
   

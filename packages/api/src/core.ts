@@ -34,27 +34,27 @@ export interface Core {
      * create a project, return the project path
      * Core module will not open the created project, extension will do this
      */
-    create: (inputs: Inputs) => Promise<Result<string, FxError>>;
+    createProject: (inputs: Inputs) => Promise<Result<string, FxError>>;
 
     /**
      * provision resource to cloud
      */
-    provision: (inputs: Inputs) => Promise<Result<Void, FxError>>;
+    provisionResources: (inputs: Inputs) => Promise<Result<Void, FxError>>;
 
     /**
      * build artifacts
      */
-    build: (inputs: Inputs) => Promise<Result<Void, FxError>>;
+    buildArtifacts: (inputs: Inputs) => Promise<Result<Void, FxError>>;
 
     /**
      * deploy resource to cloud
      */
-    deploy: (inputs: Inputs) => Promise<Result<Void, FxError>>;
+    deployArtifacts: (inputs: Inputs) => Promise<Result<Void, FxError>>;
 
     /**
      * publish app
      */
-    publish: (inputs: Inputs) => Promise<Result<Void, FxError>>;
+    publishApplication: (inputs: Inputs) => Promise<Result<Void, FxError>>;
 
     /**
      * create an environment

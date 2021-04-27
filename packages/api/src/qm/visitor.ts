@@ -185,7 +185,7 @@ const questionVisitor: QuestionVistor = async function (
     } else if (type === NodeType.folder) {
       const fileQuestion: FileQuestion = question as FileQuestion;
       const validationFunc = fileQuestion.validation ? getValidationFunction(fileQuestion.validation, inputs, remoteFuncExecutor) : undefined;
-      return await ui.showOpenDialog({
+      return await ui.showFileOpenDialog({
         defaultUri: defaultValue as string | undefined,
         canSelectFiles: false,
         canSelectFolders: true,

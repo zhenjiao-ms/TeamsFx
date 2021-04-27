@@ -264,7 +264,7 @@ export async function runCommand(task: Task): Promise<Result<unknown, FxError>> 
 
     // 6. run task
     if (task === Task.create){
-      const tmpResult = await core.create(inputs);
+      const tmpResult = await core.createProject(inputs);
       if (tmpResult.isErr()) {
           result = err(tmpResult.error);
       } else {
@@ -277,10 +277,10 @@ export async function runCommand(task: Task): Promise<Result<unknown, FxError>> 
           result = ok(null);
       }
     } 
-    else if (task === Task.provision) result = await core.provision(inputs);
-    else if (task === Task.deploy) result = await core.deploy(inputs);
-    else if (task === Task.build) result = await core.build(inputs);
-    else if (task === Task.publish) result = await core.publish(inputs);
+    else if (task === Task.provision) result = await core.provisionResources(inputs);
+    else if (task === Task.deploy) result = await core.deployArtifacts(inputs);
+    else if (task === Task.build) result = await core.buildArtifacts(inputs);
+    else if (task === Task.publish) result = await core.publishApplication(inputs);
     else if (task === Task.createEnv) result = await core.createEnv(inputs);
     else if (task === Task.removeEnv) result = await core.removeEnv(inputs);
     else if (task === Task.switchEnv) result = await core.switchEnv(inputs);

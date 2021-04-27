@@ -229,7 +229,7 @@ export class VsCodeUI implements UserInterface{
     }
   }
 
-  async showOpenDialog (option: FxOpenDialogOption):Promise<InputResult>{
+  async showFileOpenDialog (option: FxOpenDialogOption):Promise<InputResult>{
     while (true) {
       const uri = await window.showOpenDialog({
         defaultUri: option.defaultUri ? Uri.file(option.defaultUri) : undefined,

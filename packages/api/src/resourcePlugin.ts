@@ -64,28 +64,28 @@ export interface ResourcePlugin {
     /**
      * provision resource to cloud, output variable dictionary data
      */
-    provision?: (ctx: ResourceEnvContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError>>;
+    provisionResource?: (ctx: ResourceEnvContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError>>;
 
     /**
      * Configure provisioned resources.  TODO:renaming
      */
-    configureProvisionedResources?: (ctx: ResourceConfigureContext) => Promise<Result<Void, FxError>>;
+    configureResource?: (ctx: ResourceConfigureContext) => Promise<Result<Void, FxError>>;
 
     /**
      * build artifacts
      */
-    build?: (ctx: ResourceContext, inputs: Inputs) => Promise<Result<Void, FxError>>;
+    buildArtifacts?: (ctx: ResourceContext, inputs: Inputs) => Promise<Result<Void, FxError>>;
 
     /**
      * deploy resource   confirm the output??
      */
-    deploy?: (ctx: ResourceEnvContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError>>;
+    deployArtifacts?: (ctx: ResourceEnvContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError>>;
 
     /**
      * publish app confirm the output??
      * TODO: Just need manifest
      */
-    publish?: (ctx: SolutionAllContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError>>;
+    publishApplication?: (ctx: SolutionAllContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError>>;
    
     /**
      * get question model for lifecycle {@link Task} (create, provision, deploy, publish), Questions are organized as a tree. Please check {@link QTreeNode}.

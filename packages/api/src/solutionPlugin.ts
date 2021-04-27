@@ -47,28 +47,28 @@ export interface SolutionPlugin {
     /**
      * scaffold a project and return solution config template
      */
-    scaffold: (ctx: SolutionContext, inputs: Inputs) => Promise<Result<SolutionScaffoldResult, FxError>>;
+    scaffoldFiles: (ctx: SolutionContext, inputs: Inputs) => Promise<Result<SolutionScaffoldResult, FxError>>;
 
     /**
      * build
      */
-    build: (ctx: SolutionContext, inputs: Inputs) => Promise<Result<Void, FxError>>;
+    buildArtifacts: (ctx: SolutionContext, inputs: Inputs) => Promise<Result<Void, FxError>>;
 
     /**
      * provision will output VariableDict even error happends
      */
-    provision: (ctx: SolutionEnvContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError & {result:ResourceEnvResult}>>;
+    provisionResources: (ctx: SolutionEnvContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError & {result:ResourceEnvResult}>>;
 
     /**
      * deploy will output VariableDict even error happends
      */
-    deploy: (ctx: SolutionEnvContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError & {result:ResourceEnvResult}>>;
+    deployArtifacts: (ctx: SolutionEnvContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError & {result:ResourceEnvResult}>>;
  
     /**
      * publish
      * TODO: Just need manifest
      */
-    publish: (ctx: SolutionAllContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError>>;
+    publishApplication: (ctx: SolutionAllContext, inputs: Inputs) => Promise<Result<ResourceEnvResult, FxError>>;
 
     /**
      * get question model for lifecycle {@link Task} (create, provision, deploy, publish), Questions are organized as a tree. Please check {@link QTreeNode}.

@@ -157,7 +157,7 @@ export enum MsgLevel {
 export interface UserInterface{
   showQuickPick: (option: FxQuickPickOption) => Promise<InputResult> 
   showInputBox: (option: FxInputBoxOption) => Promise<InputResult>;
-  showOpenDialog: (option: FxOpenDialogOption) => Promise<InputResult>;
+  showFileOpenDialog: (option: FxOpenDialogOption) => Promise<InputResult>;
   createProgressBar?: (title: string, totalSteps: number) => IProgressHandler;
   openExternal?(link: string): Promise<boolean>;
   showMessage?(level:MsgLevel, message: string, ...items: string[]): Promise<string | undefined>;
