@@ -9,7 +9,7 @@ import { LifecycleFuncNames } from "../constants";
 import { RetryHandler } from "../utils/retryHandler";
 
 export class AppStudio {
-    private static baseUrl = "https://dev.teams.microsoft.com";
+    private static baseUrl = "https://dev-int.teams.microsoft.com";
 
     private static newAxiosInstance(accessToken: string): AxiosInstance {
         if (!accessToken) {

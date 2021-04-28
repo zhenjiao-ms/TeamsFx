@@ -14,7 +14,7 @@ export namespace AppStudio {
         base64String: string
     };
 
-    const baseUrl = "https://dev.teams.microsoft.com";
+    const baseUrl = "https://dev-int.teams.microsoft.com";
 
     // Creates a new axios instance to call app studio to prevent setting the accessToken
     // on global instance.

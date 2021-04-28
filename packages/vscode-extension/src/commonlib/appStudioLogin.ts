@@ -18,7 +18,7 @@ import * as StringResources from "../resources/Strings.json";
 import * as util from "util";
 
 const accountName = "appStudio";
-const scopes = ["https://dev.teams.microsoft.com/AppDefinitions.ReadWrite"];
+const scopes = ["https://dev-int.teams.microsoft.com/AppDefinitions.ReadWrite"];
 const SERVER_PORT = 0;
 
 const beforeCacheAccess = getBeforeCacheAccess(accountName);

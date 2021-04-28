@@ -10,7 +10,7 @@ import { AppStudioResultFactory } from "./results";
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace AppStudioClient {
-    const baseUrl = "https://dev.teams.microsoft.com";
+    const baseUrl = "https://dev-int.teams.microsoft.com";
 
     // Creates a new axios instance to call app studio to prevent setting the accessToken on global instance.
     function createRequesterWithToken(appStudioToken: string): AxiosInstance {

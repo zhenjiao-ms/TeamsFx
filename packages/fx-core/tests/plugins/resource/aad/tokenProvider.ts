@@ -22,7 +22,7 @@ const config = {
 };
 
 const request: DeviceCodeRequest = {
-  scopes: ["https://dev.teams.microsoft.com/AppDefinitions.ReadWrite"],
+  scopes: ["https://dev-int.teams.microsoft.com/AppDefinitions.ReadWrite"],
   deviceCodeCallback: (response) => {
     console.log(response);
   },

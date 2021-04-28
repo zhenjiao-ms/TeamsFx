@@ -8,7 +8,7 @@ import * as vscode from "vscode";
 import { login, LoginStatus } from "./common/login";
 import { signedIn, signedOut } from "./common/constant";
 
-const scopes = ["https://dev.teams.microsoft.com/AppDefinitions.ReadWrite"];
+const scopes = ["https://dev-int.teams.microsoft.com/AppDefinitions.ReadWrite"];
 
 // this login to work for code space only
 export class AppStudioCodeSpaceLogin extends login implements AppStudioTokenProvider {

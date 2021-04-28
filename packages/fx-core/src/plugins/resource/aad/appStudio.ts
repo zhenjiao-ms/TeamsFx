@@ -6,7 +6,7 @@ import { IAADPassword } from "./interfaces/IAADApplication";
 import { IAADDefinition } from "./interfaces/IAADDefinition";
 
 import axios from "axios";
-const baseUrl = `https://dev.teams.microsoft.com`;
+const baseUrl = `https://dev-int.teams.microsoft.com`;
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace AppStudio {

@@ -573,11 +573,11 @@ export async function openSamplesHandler() {
 }
 
 export async function openAppManagement() {
-  return env.openExternal(Uri.parse("https://dev.teams.microsoft.com/apps"));
+  return env.openExternal(Uri.parse("https://dev-int.teams.microsoft.com/apps"));
 }
 
 export async function openBotManagement() {
-  return env.openExternal(Uri.parse("https://dev.teams.microsoft.com/bots"));
+  return env.openExternal(Uri.parse("https://dev-int.teams.microsoft.com/bots"));
 }
 
 export async function openReportIssues() {
