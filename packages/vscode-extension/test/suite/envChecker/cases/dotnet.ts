@@ -18,6 +18,7 @@ import { commandExistsInPath } from "../utils/common";
 
 const rimraf = require("rimraf");
 const chmodr = require('chmodr');
+const find = require('find-process');
 
 const dotnetConfigPath = path.join(os.homedir(), "." + ConfigFolderName, "dotnet.json");
 const dotnetPrivateInstallPath = path.join(os.homedir(), "." + ConfigFolderName, "bin", "dotnet");
@@ -44,10 +45,12 @@ function createTestChecker(
 async function cleanup() {
     // fs-extra.remove() does nothing if the file does not exist.
     await fs.remove(dotnetConfigPath);
-    if (fs.existsSync(dotnetPrivateInstallPath)) {
-      chmodr(dotnetPrivateInstallPath, 0o777);
-      rimraf.sync(dotnetPrivateInstallPath);
-    }
+    const processes = await find("name", "dotnet", true);
+    processes.forEach((p: { pid: number; }, index: number, array: any) => process.kill(p.pid, "SIGINT"));
+    // if (fs.existsSync(dotnetPrivateInstallPath)) {
+    //   chmodr(dotnetPrivateInstallPath, 0o777);
+    //   rimraf.sync(dotnetPrivateInstallPath);
+    // }
     await fs.remove(dotnetPrivateInstallPath);
 }
 
