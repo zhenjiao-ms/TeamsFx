@@ -41,6 +41,7 @@ function createTestChecker(
 async function cleanup() {
     // fs-extra.remove() does nothing if the file does not exist.
     await fs.remove(dotnetConfigPath);
+    await fs.rmdir(dotnetPrivateInstallPath);
     await fs.remove(dotnetPrivateInstallPath);
 }
 

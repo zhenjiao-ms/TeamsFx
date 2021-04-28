@@ -396,7 +396,7 @@ export class DotnetChecker implements IDepsChecker {
     // so we will fail to cleanup the dotnet dir in CI.
     // Add back `validateWithHelloWorld` when this issue is solved.
     const isInstallationValid =
-      (await this.isDotnetInstalledCorrectly())/* && (await this.validateWithHelloWorld())*/;
+      (await this.isDotnetInstalledCorrectly()) && (await this.validateWithHelloWorld());
     if (!isInstallationValid) {
       this._telemetry.sendEvent(DepsCheckerEvent.dotnetValidationError);
       await DotnetChecker.cleanup();
