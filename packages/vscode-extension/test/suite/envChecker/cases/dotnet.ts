@@ -17,6 +17,7 @@ import { ConfigFolderName } from "fx-api";
 import { commandExistsInPath } from "../utils/common";
 
 const rimraf = require("rimraf");
+const chmodr = require('chmodr');
 
 const dotnetConfigPath = path.join(os.homedir(), "." + ConfigFolderName, "dotnet.json");
 const dotnetPrivateInstallPath = path.join(os.homedir(), "." + ConfigFolderName, "bin", "dotnet");
@@ -44,6 +45,7 @@ async function cleanup() {
     // fs-extra.remove() does nothing if the file does not exist.
     await fs.remove(dotnetConfigPath);
     if (fs.existsSync(dotnetPrivateInstallPath)) {
+      chmodr(dotnetPrivateInstallPath, 0o777);
       rimraf.sync(dotnetPrivateInstallPath);
     }
     await fs.remove(dotnetPrivateInstallPath);
