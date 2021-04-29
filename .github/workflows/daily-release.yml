@@ -3,6 +3,7 @@ name: Daily release
 on:
   schedule:
     - cron: "0 20 * * *"
+  workflow_dispatch:
 
 jobs:
   release-npm:
@@ -19,7 +20,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v2.1.2
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 14
 
       - name: Setup npm registry
         run: |
@@ -45,7 +46,7 @@ jobs:
         run: |
           git config --global user.name 'MSFT-yiz'
           git config --global user.email 'yiz@microsoft.com'
-          npx lerna publish --no-private --yes prerelease
+          npx lerna publish --no-private --preid alpha --yes prerelease
 
   release-vsix:
     needs: release-npm
@@ -62,7 +63,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v2.1.2
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 14
 
       - name: Setup npm registry
         run: |
@@ -78,8 +79,8 @@ jobs:
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.CD_PAT }}"
-          automatic_release_tag: "latest"
-          prerelease: false
+          automatic_release_tag: "daily"
+          prerelease: true
           files: |
             ./packages/**/*.vsix
 
