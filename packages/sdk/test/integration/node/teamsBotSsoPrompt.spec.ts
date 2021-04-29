@@ -13,7 +13,7 @@ import {
   StatePropertyAccessor,
   StatusCodes,
   TestAdapter,
-  tokenExchangeOperationName,
+  tokenExchangeOperationName
 } from "botbuilder-core";
 import { DialogSet, DialogState, DialogTurnStatus } from "botbuilder-dialogs";
 import {
@@ -26,7 +26,11 @@ import {
 import { assert, use as chaiUse } from "chai";
 import chaiPromises from "chai-as-promised";
 import sinon from "sinon";
-import { getSsoTokenFromTeams, MockEnvironmentVariable, RestoreEnvironmentVariable } from "../../helper";
+import {
+  getSsoTokenFromTeams,
+  MockEnvironmentVariable,
+  RestoreEnvironmentVariable
+} from "../../helper";
 import { parseJwt } from "../../../src/util/utils";
 import { afterEach, beforeEach } from "mocha";
 
@@ -50,17 +54,17 @@ describe("TeamsBotSsoPrompt - node", () => {
   }
   const sandbox = sinon.createSandbox();
 
-  before(async function () {
+  before(async function() {
     restore = MockEnvironmentVariable();
     ssoToken = await getSsoTokenFromTeams();
   });
 
-  after(function () {
+  after(function() {
     sandbox.restore();
     RestoreEnvironmentVariable(restore);
   });
 
-  it("should not be able to sign user in and get exchange tokens due to not consent", async function () {
+  it("should not be able to sign user in and get exchange tokens due to not consent", async function() {
     this.timeout(5000);
 
     const notConsentScopes = ["Calendars.Read"];
@@ -86,7 +90,7 @@ describe("TeamsBotSsoPrompt - node", () => {
       });
   });
 
-  it("should be able to sign user in and get exchange tokens", async function () {
+  it("should be able to sign user in and get exchange tokens", async function() {
     this.timeout(5000);
 
     const adapter: TestAdapter = await initializeTestEnv({});
@@ -116,7 +120,7 @@ describe("TeamsBotSsoPrompt - node", () => {
       });
   });
 
-  it("should not end on invalid message when endOnInvalidMessage set to false", async function () {
+  it("should not end on invalid message when endOnInvalidMessage set to false", async function() {
     const adapter: TestAdapter = await initializeTestEnv({ endOnInvalidMessage: false });
 
     await adapter
@@ -168,7 +172,10 @@ describe("TeamsBotSsoPrompt - node", () => {
     };
   }
 
-  function assertTeamsSsoOauthCardActivity(activity: Partial<Activity>, scopes: string[] = ["User.Read"]): void {
+  function assertTeamsSsoOauthCardActivity(
+    activity: Partial<Activity>,
+    scopes: string[] = ["User.Read"]
+  ): void {
     assert.isArray(activity.attachments);
     assert.strictEqual(activity.attachments?.length, 1);
     assert.strictEqual(activity.attachments![0].contentType, CardFactory.contentTypes.oauthCard);
@@ -208,9 +215,7 @@ describe("TeamsBotSsoPrompt - node", () => {
    * @param endOnInvalidMessage boolean value set to teamsSsoPromptSettings.endOnInvalidMessage property
    * @param channelId value set to dialog context activity channel. Defaults to `Channels.MSteams`.
    */
-  async function initializeTestEnv(
-    param: InitializeParams
-  ): Promise<TestAdapter> {
+  async function initializeTestEnv(param: InitializeParams): Promise<TestAdapter> {
     // Create new ConversationState with MemoryStorage
     const convoState: ConversationState = new ConversationState(new MemoryStorage());
 
@@ -238,7 +243,8 @@ describe("TeamsBotSsoPrompt - node", () => {
     // Initialize TestAdapter.
     const adapter: TestAdapter = new TestAdapter(async (turnContext) => {
       const dc = await dialogs.createContext(turnContext);
-      dc.context.activity.channelId = param.channelId === undefined ? Channels.Msteams : param.channelId;
+      dc.context.activity.channelId =
+        param.channelId === undefined ? Channels.Msteams : param.channelId;
 
       const results = await dc.continueDialog();
       if (results.status === DialogTurnStatus.empty) {
@@ -259,9 +265,9 @@ describe("TeamsBotSsoPrompt - node", () => {
 });
 
 interface InitializeParams {
-  scopes?: string[],
-  timeout_value?: number,
-  endOnInvalidMessage?: boolean,
-  channelId?: Channels,
-  config?: Configuration,
+  scopes?: string[];
+  timeout_value?: number;
+  endOnInvalidMessage?: boolean;
+  channelId?: Channels;
+  config?: Configuration;
 }

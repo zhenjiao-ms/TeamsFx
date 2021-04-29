@@ -3,7 +3,12 @@
 
 import { assert, expect, use as chaiUse } from "chai";
 import chaiPromises from "chai-as-promised";
-import { ErrorCode, ErrorWithCode, loadConfiguration, OnBehalfOfUserCredential } from "../../../../src";
+import {
+  ErrorCode,
+  ErrorWithCode,
+  loadConfiguration,
+  OnBehalfOfUserCredential
+} from "../../../../src";
 import sinon from "sinon";
 import mockedEnv from "mocked-env";
 import { AuthenticationResult, ConfidentialClientApplication } from "@azure/msal-node";
