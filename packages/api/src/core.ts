@@ -21,7 +21,7 @@
  */
  
 import {  Result } from "neverthrow";  
-import { EnvMeta, Func, FunctionRouter, FxError,  Inputs,  QTreeNode, Task, Void} from "./index";
+import { EnvMeta, Func, FunctionRouter, FxError,  Inputs,  ProjectConfigs,  QTreeNode, Task, Void} from "./index";
 
 
 
@@ -97,4 +97,9 @@ export interface Core {
      * `executeQuestionFlowFunction` will router the execute request from core--->solution--->resource plugin according to `FunctionRouter`.
      */
     executeQuestionFlowFunction: (func:Func, previousAnswers: Inputs) => Promise<Result<unknown, FxError>>; 
+
+    /**
+     * get all project persist configs
+     */
+    getProjectConfigs:(inputs: Inputs) => Promise<Result<ProjectConfigs, FxError>>; 
 }

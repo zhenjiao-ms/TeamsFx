@@ -26,14 +26,15 @@ import {
   SolutionScaffoldResult,
   OptionItem,
   ResourceEnvResult,
+  ProjectConfigs,
 } from "fx-api";
 import { hooks } from "@feathersjs/hooks";
 import { writeConfigMW } from "./middlewares/config";
-import { projectTypeCheckerMW } from "./middlewares/validation";
+import { projectTypeCheckerMW } from "./middlewares/supportChecker";
 import * as error from "./error";
 import { CoreContext } from "./context";
 import { DefaultSolution } from "../plugins/solution/default";
-import { initFolder, mergeDict, replaceTemplateVariable } from "./tools";
+import { deepCopy, initFolder, mergeDict, replaceTemplateVariable } from "./tools";
 import { CoreQuestionNames, QuestionAppName, QuestionEnvLocal, QuestionEnvName, QuestionEnvSideLoading, QuestionRootFolder, QuestionSelectEnv, QuestionSelectSolution } from "./question";
 import * as fs from "fs-extra";
 import * as path from "path";
@@ -270,6 +271,23 @@ export class Executor {
       )
     );
   }
+
+  @hooks([projectTypeCheckerMW])
+  static async getProjectConfigs( ctx: CoreContext, inputs: Inputs ): Promise<Result<ProjectConfigs, FxError>> {
+    let configs:ProjectConfigs = {
+      projectSetting: ctx.projectSetting,
+      projectState: ctx.projectState,
+      provisionTemplates: ctx.provisionTemplates,
+      deployTemplates: ctx.deployTemplates,
+      provisionConfigs: this.getProvisionConfigs(ctx),
+      deployConfigs: this.getDeployConfigs(ctx),
+      resourceInstanceValues: ctx.resourceInstanceValues,
+      stateValues: ctx.stateValues
+    };
+    configs = deepCopy(configs);
+    return ok(configs);
+  }
+  
   
   @hooks([projectTypeCheckerMW, writeConfigMW])
   static async createEnv(ctx: CoreContext, inputs: Inputs): Promise<Result<Void, FxError>> {

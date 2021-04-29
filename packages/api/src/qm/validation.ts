@@ -62,22 +62,14 @@ export async function validate(
   {
     //FileValidation
     const fileValidation: FileValidation = validation as FileValidation;
-    if (fileValidation.exists || fileValidation.notExist) {
+    if (fileValidation.exists !== undefined) {
       const path = valueToValidate as string;
       if (!path) {
-        return `path should not be empty!`;
+        return `file path should not be empty!`;
       }
-      if (fileValidation.exists) {
-        const exists = await fs.pathExists(path);
-        if (!exists) {
-          return `path not exists:'${path}'`;
-        }
-      }
-      if (fileValidation.notExist) {
-        const exists = await fs.pathExists(path);
-        if (exists) {
-          return `path already exists:${path}`;
-        }
+      const exists = await fs.pathExists(path);
+      if (fileValidation.exists !== exists) {
+        return `'${path}' does not meet condition of existance = ${fileValidation.exists}`;
       }
       return undefined;
     }

@@ -132,10 +132,6 @@ export interface FileValidation extends AnyValidation {
      * the file/folder must exist
      */
     exists?: boolean;
-    /**
-     * the file/folder must do not exist
-     */
-    notExist?: boolean;
 }
 
 /**
@@ -167,14 +163,6 @@ export interface BaseQuestion {
      */
     name: string;
     /**
-     * question title
-     */
-    title?: string;
-    /**
-     * @deprecated use `title` instead
-     */
-    description?: string;
-    /**
      * question answer value
      */
     value?: AnswerValue;
@@ -187,6 +175,8 @@ export interface BaseQuestion {
 export interface SingleSelectQuestion extends BaseQuestion {
     
     type: NodeType.singleSelect;
+
+    title: string | Func,
     
     /**
      * select option
@@ -201,17 +191,12 @@ export interface SingleSelectQuestion extends BaseQuestion {
     /**
      * The default selected `id` value of the option item
      */
-    default?: string;
+    default?: string | Func;
     
     /**
      * placeholder text
      */
-    placeholder?: string;
-    
-    /**
-     * prompt text
-     */
-    prompt?: string;
+    placeholder?: string | Func;
     
     /**
      * whether the answer return the original `OptionItem` object.
@@ -231,6 +216,8 @@ export interface SingleSelectQuestion extends BaseQuestion {
 
 export interface MultiSelectQuestion extends BaseQuestion {
     type: NodeType.multiSelect;
+
+    title: string | Func,
     
     /**
      * select option
@@ -245,43 +232,36 @@ export interface MultiSelectQuestion extends BaseQuestion {
     /**
      * The default selected `id` array of the option item
      */
-    default?: string[];
+    default?: string[] | Func;
 
     /**
      * placeholder text
      */
-    placeholder?: string;
-
+    placeholder?: string | Func;
+    
     /**
-     * prompt text
-     */
-    prompt?: string;
-
-    /**
-     * whether the answer return the original `OptionItem` object array.
-     * if true: the answer is the original `OptionItem` object array; 
-     * if false: the answer is the `id` array of the `OptionItem`
-     * The default value is false
+     * whether to return `OptionItem` or `OptionItem[]` if the items have type `OptionItem[]`
+     * if the items has type `string[]`, this config will not take effect, the answer has type `string` or `string[]`
      */
     returnObject?: boolean;
 
     /**
      * whether to skip the single option select question
      * if true: single select question will be automtically answered with the single option;
-     * if false: use still need to do the selection manually even there is no secon choice
+     * if false: use still need to do the selection manually even there is no second choice
      */
     skipSingleOption?:boolean;
 
     /**
      * a callback function when the select changes
-     * @items: current selected `OptionItem` array
-     * @returns: the new selected `id` array
      */
-    onDidChangeSelection?: (items: OptionItem[]) => Promise<string[]>;
+    onDidChangeSelection?: (currentSelectedIds: Set<string>, previousSelectedIds: Set<string>) => Promise<Set<string>>;
 }
 
 export interface TextInputQuestion extends BaseQuestion {
     type: NodeType.text | NodeType.password;
+
+    title: string | Func,
 
     value?: string;
 
@@ -293,12 +273,12 @@ export interface TextInputQuestion extends BaseQuestion {
     /**
      * placeholder text
      */
-    placeholder?: string;
+    placeholder?: string | Func;
 
     /**
      * prompt text
      */
-    prompt?: string;
+    prompt?: string | Func;
 
     /**
      * validation property:
@@ -315,17 +295,19 @@ export interface TextInputQuestion extends BaseQuestion {
  */
 export interface NumberInputQuestion extends BaseQuestion {
     type: NodeType.number;
+    title: string | Func,
     value?: number;
     default?: number | Func;
-    placeholder?: string;
-    prompt?: string;
+    placeholder?: string | Func;
+    prompt?: string | Func;
     validation?: NumberValidation | RemoteFuncValidation | LocalFuncValidation;
 }
 
 export interface FileQuestion extends BaseQuestion {
     type: NodeType.file | NodeType.folder;
+    title: string | Func,
     value?: string;
-    default?: string;
+    default?: string | Func;
     validation?: FileValidation | StringValidation | RemoteFuncValidation | LocalFuncValidation;
 }
 
@@ -341,7 +323,6 @@ export interface FuncQuestion extends BaseQuestion, Func {
 export interface Group {
     type: NodeType.group;
     name?: string; //group name
-    description?: string; // description
 }
 
 export type Question =

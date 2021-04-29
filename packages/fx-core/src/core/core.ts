@@ -25,11 +25,12 @@ import {
   ResourceTemplates,
   ResourceTemplate,
   ResourceInstanceValues,
-  StateValues
+  StateValues,
+  ProjectConfigs
 } from "fx-api";
 import { hooks } from "@feathersjs/hooks";
 import { concurrentMW } from "./middlewares/concurrent";
-import { errorHandlerMW } from "./middlewares/recover";
+import { errorHandlerMW } from "./middlewares/errorhandle";
 import { DefaultSolution } from "../plugins/solution/default";
 import { CoreContext } from "./context";
 import { Executor } from "./executor";
@@ -241,6 +242,12 @@ export class FxCore implements Core {
   public async executeQuestionFlowFunction(func:Func, inputs: Inputs) : Promise<Result<unknown, FxError>>{
     const coreContext = await this.loadCoreContext(inputs.projectPath);
     return await Executor.executeQuestionFlowFunction(coreContext, func, inputs);
+  }
+
+  @hooks([errorHandlerMW])
+  public async getProjectConfigs(inputs: Inputs) : Promise<Result<ProjectConfigs, FxError>>{
+    const coreContext = await this.loadCoreContext(inputs.projectPath);
+    return await Executor.getProjectConfigs(coreContext, inputs);
   }
 }
  

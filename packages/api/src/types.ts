@@ -189,3 +189,16 @@ export interface Context {
     projectState: ProjectState;
 }
  
+/**
+ * project config model
+ */
+export interface ProjectConfigs{
+    projectSetting: ProjectSetting; 
+    projectState: ProjectState;
+    provisionTemplates?:ResourceTemplates;
+    deployTemplates?: ResourceTemplates;
+    provisionConfigs?:ResourceConfigs;
+    deployConfigs?: ResourceConfigs;
+    resourceInstanceValues?: ResourceInstanceValues;
+    stateValues?: StateValues;
+}

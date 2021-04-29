@@ -35,19 +35,15 @@ export interface FxQuickPickOption {
   backButton?: boolean;
 
   /**
-   * whether the answer return the original `OptionItem` object array.
-   * if true: the answer is the original `OptionItem` object array; 
-   * if false: the answer is the `id` array of the `OptionItem`
-   * The default value is false
+   * whether to return `OptionItem` or `OptionItem[]` if the items have type `OptionItem[]`
+   * if the items has type `string[]`, this config will not take effect, the answer has type `string` or `string[]`
    */
   returnObject?: boolean;
 
   /**
    * a callback function when the select changes
-   * @items: current selected `OptionItem` array
-   * @returns: the new selected `id` array
    */
-  onDidChangeSelection?: (items: OptionItem[]) => Promise<string[]>;
+   onDidChangeSelection?: (currentSelectedIds: Set<string>, previousSelectedIds: Set<string>) => Promise<Set<string>>;
 }
 
 export interface FxInputBoxOption {
@@ -108,6 +104,10 @@ export interface FxOpenDialogOption{
     title?: string;
 
     validation?: (input: string) => Promise<string | undefined>;
+
+    backButton?: boolean;
+    step?: number;
+    totalSteps?: number;
 }
 
 export enum InputResultType {

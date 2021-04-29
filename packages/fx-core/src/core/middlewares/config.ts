@@ -30,13 +30,9 @@ export const writeConfigMW: Middleware = async (
      
       try { 
         const configFolder = `${coreCtx.projectPath}\\.${ConfigFolderName}`;
-        
         await fs.writeFile(  `${configFolder}\\setting.json`, JSON.stringify(coreCtx.projectSetting, null, 4)  );
-    
         await fs.writeFile(  `${configFolder}\\state.json`, JSON.stringify(coreCtx.projectState, null, 4)  );
-    
         const envName = coreCtx.projectSetting.currentEnv;
-  
         // provision,deploy template
         const resources = coreCtx.projectSetting.solutionSetting?.resources;
   
