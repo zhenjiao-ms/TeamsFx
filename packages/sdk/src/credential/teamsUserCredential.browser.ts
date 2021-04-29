@@ -14,7 +14,7 @@ import { GrantType } from "../models/grantType";
 import { AccessTokenResult } from "../models/accessTokenResult";
 import { getUserInfoFromSsoToken, parseJwt } from "../util/utils";
 import { formatString } from "../util/utils";
-import { internalLogger } from '../util/logger';
+import { internalLogger } from "../util/logger";
 
 const accessTokenCacheKeyPrefix = "accessToken";
 const separator = "-";
