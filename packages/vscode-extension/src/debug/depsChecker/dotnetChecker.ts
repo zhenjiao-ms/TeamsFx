@@ -423,6 +423,8 @@ export class DotnetChecker implements IDepsChecker {
       return false;
     }
 
+    await this._logger.debug(await cpUtils.executeCommand(undefined, this._logger, {shell: false}, dotnetPath, "--info"));
+
     const samplePath = path.join(os.homedir(), `.${ConfigFolderName}`, "dotnetSample");
     const expected: string = "Hello World";
     let actual: string = "";
