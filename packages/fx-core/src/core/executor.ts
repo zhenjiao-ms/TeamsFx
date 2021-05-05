@@ -4,7 +4,6 @@
 
 import {
   err,
-  Func,
   FxError,
   NodeType,
   ok,
@@ -142,6 +141,15 @@ export class Executor {
     ctx.solutionContext = solutionContext;
     if(task === Task.createEnv){
       node.addChild(new QTreeNode(QuestionEnvName));
+      QuestionEnvName.validation = {
+        validFunc : (input: string|string[]|number, previousInputs: Inputs) : string | undefined | Promise<string | undefined> => {
+          const envName = input as string;
+          if(ctx.projectSetting.environments[envName])
+            return `enviroment already exist!`;
+          else 
+            return undefined;
+        }
+      };
       node.addChild(new QTreeNode(QuestionEnvLocal));
       node.addChild(new QTreeNode(QuestionEnvSideLoading));
     }
@@ -149,7 +157,7 @@ export class Executor {
       node.addChild(new QTreeNode(QuestionSelectEnv));
     }
     else if (task === Task.create) {
-      node.addChild(new QTreeNode(QuestionAppName));
+      
       //make sure that global solutions are loaded
       const solutionNames: string[] = [];
       for (const k of ctx.globalSolutions.keys()) {
@@ -171,6 +179,7 @@ export class Executor {
         }
       }
       node.addChild(new QTreeNode(QuestionRootFolder));
+      node.addChild(new QTreeNode(QuestionAppName));
     } else if (ctx.solution) {
       const res = await ctx.solution.getQuestionsForLifecycleTask(solutionContext, task, inputs);
       if (res.isErr()) return res;
@@ -204,73 +213,52 @@ export class Executor {
     );
   }
 
-  @hooks([projectTypeCheckerMW, writeConfigMW])
-  static async executeUserTask( ctx: CoreContext,  func: Func, inputs: Inputs ): Promise<Result<unknown, FxError>> {
-    const namespace = func.namespace;
-    const array = namespace ? namespace.split("/") : [];
-    if ("" !== namespace && array.length > 0) {
-      const solutionName = array[0];
-      const solution = ctx.globalSolutions.get(solutionName);
-      if (solution && solution.executeUserTask) {
-        const solutionContext = this.createSolutionAllContext(ctx);
-        ctx.solutionContext = solutionContext;
-        return await solution.executeUserTask(solutionContext, func, inputs);
-      }
-    }
-    return err(
-      returnUserError(
-        new Error(`executeUserTaskRouteFailed:${JSON.stringify(func)}`),
-        error.CoreSource,
-        error.CoreErrorNames.executeUserTaskRouteFailed
-      )
-    );
-  }
 
-  @hooks([projectTypeCheckerMW, writeConfigMW])
-  static async executeQuestionFlowFunction( ctx: CoreContext, func:Func, inputs: Inputs ): Promise<Result<unknown, FxError>> {
-    const namespace = func.namespace;
-    const array = namespace ? namespace.split("/") : [];
-    if (!namespace || "" === namespace || array.length === 0) {
-      if (func.method === "validateFolder") {
-        if (!func.params) return ok(undefined);
-        return await this.validateFolder(func.params as string, inputs);
-      }
-      else if (func.method === "listEnv") {
-        const options:OptionItem[] = [];
-        for(const k of Object.keys(ctx.projectSetting.environments)){
-          const envMeta = ctx.projectSetting.environments[k];
-          options.push({
-            id: envMeta.name,
-            label: envMeta.name,
-            description: `local:${envMeta.local}, sideloading:${envMeta.sideloading}`
-          });
-        }
-        return ok(options);
-      }
-      else if (func.method === "validateEnvName") {
-        const envName = func.params as string;
-        if(ctx.projectSetting.environments[envName])
-          return ok(`enviroment already exist!`);
-        else 
-          return ok(undefined);
-      }
-    } else {
-      const solutionName = array[0];
-      const solution = ctx.globalSolutions.get(solutionName);
-      if (solution && solution.executeQuestionFlowFunction) {
-        const solutionContext = this.createSolutionAllContext(ctx);
-        ctx.solutionContext = solutionContext;
-        return await solution.executeQuestionFlowFunction(solutionContext, func, inputs);
-      }
-    }
-    return err(
-      returnUserError(
-        new Error(`CallFuncRouteFailed:${JSON.stringify(func)}`),
-        error.CoreSource,
-        error.CoreErrorNames.CallFuncRouteFailed
-      )
-    );
-  }
+  // @hooks([projectTypeCheckerMW, writeConfigMW])
+  // static async executeQuestionFlowFunction( ctx: CoreContext, func:Func, inputs: Inputs ): Promise<Result<unknown, FxError>> {
+  //   const namespace = func.namespace;
+  //   const array = namespace ? namespace.split("/") : [];
+  //   if (!namespace || "" === namespace || array.length === 0) {
+  //     if (func.method === "validateFolder") {
+  //       if (!func.params) return ok(undefined);
+  //       return await this.validateFolder(func.params as string, inputs);
+  //     }
+  //     else if (func.method === "listEnv") {
+  //       const options:OptionItem[] = [];
+  //       for(const k of Object.keys(ctx.projectSetting.environments)){
+  //         const envMeta = ctx.projectSetting.environments[k];
+  //         options.push({
+  //           id: envMeta.name,
+  //           label: envMeta.name,
+  //           description: `local:${envMeta.local}, sideloading:${envMeta.sideloading}`
+  //         });
+  //       }
+  //       return ok(options);
+  //     }
+  //     else if (func.method === "validateEnvName") {
+  //       const envName = func.params as string;
+  //       if(ctx.projectSetting.environments[envName])
+  //         return ok(`enviroment already exist!`);
+  //       else 
+  //         return ok(undefined);
+  //     }
+  //   } else {
+  //     const solutionName = array[0];
+  //     const solution = ctx.globalSolutions.get(solutionName);
+  //     if (solution && solution.executeQuestionFlowFunction) {
+  //       const solutionContext = this.createSolutionAllContext(ctx);
+  //       ctx.solutionContext = solutionContext;
+  //       return await solution.executeQuestionFlowFunction(solutionContext, func, inputs);
+  //     }
+  //   }
+  //   return err(
+  //     returnUserError(
+  //       new Error(`CallFuncRouteFailed:${JSON.stringify(func)}`),
+  //       error.CoreSource,
+  //       error.CoreErrorNames.CallFuncRouteFailed
+  //     )
+  //   );
+  // }
 
   @hooks([projectTypeCheckerMW])
   static async getProjectConfigs( ctx: CoreContext, inputs: Inputs ): Promise<Result<ProjectConfigs, FxError>> {

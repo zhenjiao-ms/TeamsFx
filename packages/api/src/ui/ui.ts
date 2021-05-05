@@ -2,15 +2,18 @@
 // Licensed under the MIT license.
 
 import { FxError } from "../error";
-import { AnswerValue, OptionItem, StaticOption } from "../qm/question";
+import { AnswerValue, FuncQuestion, OptionItem, StaticOption } from "../qm/question";
 
- 
 
-export interface FxQuickPickOption {
-  /**
-   * title text of the QuickPick
-   */
-  title: string;
+export interface FxUIOption{
+  title: string,
+  step?: number;
+  totalSteps?: number;
+}
+
+
+export interface FxQuickPickOption extends FxUIOption{
+  
   /**
    * select option list
    */
@@ -30,11 +33,6 @@ export interface FxQuickPickOption {
   placeholder?: string;
 
   /**
-   * whether enable `go back` button
-   */
-  backButton?: boolean;
-
-  /**
    * whether to return `OptionItem` or `OptionItem[]` if the items have type `OptionItem[]`
    * if the items has type `string[]`, this config will not take effect, the answer has type `string` or `string[]`
    */
@@ -43,21 +41,21 @@ export interface FxQuickPickOption {
   /**
    * a callback function when the select changes
    */
-   onDidChangeSelection?: (currentSelectedIds: Set<string>, previousSelectedIds: Set<string>) => Promise<Set<string>>;
+  onDidChangeSelection?: (currentSelectedIds: Set<string>, previousSelectedIds: Set<string>) => Promise<Set<string>>;
+
+  validation?: (input: string[]) => Promise<string | undefined>;
 }
 
-export interface FxInputBoxOption {
-  title: string;
-  password: boolean;
+export interface FxInputBoxOption extends FxUIOption{
+  password?: boolean;
+  number?:boolean;
   defaultValue?: string;
   placeholder?: string;
   prompt?: string;
   validation?: (input: string) => Promise<string | undefined>;
-  backButton?: boolean;
-  number?:boolean;
 }
 
-export interface FxOpenDialogOption{
+export interface FxFileOpenDialogOption extends FxUIOption{
     /**
      * The resource the dialog shows when opened.
      */
@@ -95,19 +93,7 @@ export interface FxOpenDialogOption{
      */
     filters?: { [name: string]: string[] };
 
-    /**
-     * Dialog title.
-     *
-     * This parameter might be ignored, as not all operating systems display a title on open dialogs
-     * (for example, macOS).
-     */
-    title?: string;
-
     validation?: (input: string) => Promise<string | undefined>;
-
-    backButton?: boolean;
-    step?: number;
-    totalSteps?: number;
 }
 
 export enum InputResultType {
@@ -118,12 +104,11 @@ export enum InputResultType {
   pass = "pass" // for single select option quick pass it
 }
 
-export interface InputResult {
+export interface InputResult{
   type: InputResultType;
   result?: AnswerValue;
   error?: FxError;
 }
-
 
 export interface IProgressHandler {
   /**
@@ -154,10 +139,15 @@ export enum MsgLevel {
   Error = "Error",
 }
 
+export interface FxFuncQuestionOption extends FxUIOption{
+  func: FuncQuestion;
+}
+
 export interface UserInterface{
+  showFuncQuestion: (option: FxFuncQuestionOption) => Promise<InputResult>;
   showQuickPick: (option: FxQuickPickOption) => Promise<InputResult> 
   showInputBox: (option: FxInputBoxOption) => Promise<InputResult>;
-  showFileOpenDialog: (option: FxOpenDialogOption) => Promise<InputResult>;
+  showFileOpenDialog: (option: FxFileOpenDialogOption) => Promise<InputResult>;
   createProgressBar?: (title: string, totalSteps: number) => IProgressHandler;
   openExternal?(link: string): Promise<boolean>;
   showMessage?(level:MsgLevel, message: string, ...items: string[]): Promise<string | undefined>;

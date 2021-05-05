@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 import {
-  Func,
   TextInputQuestion,
   NodeType,
   QTreeNode,
@@ -13,34 +12,13 @@ import {
   OptionItem,
   MultiSelectQuestion,
   FileQuestion,
-  NumberInputQuestion
+  NumberInputQuestion,
+  FuncQuestion
 } from "./question";
-import { getValidationFunction, RemoteFuncExecutor, validate } from "./validation";
+import { getValidationFunction, validate } from "./validation";
 import { returnSystemError, returnUserError } from "../error";
 import { Inputs } from "../types";
 import { InputResult, InputResultType, UserInterface } from "../ui";
-
-async function getRealValue(
-  parentValue: unknown,
-  defaultValue: unknown,
-  inputs: Inputs ,
-  remoteFuncExecutor?: RemoteFuncExecutor
-): Promise<unknown> {
-  let output: unknown = defaultValue;
-  if (typeof defaultValue === "string") {
-    const defstr = defaultValue as string;
-    if (defstr === "$parent") {
-      output = parentValue;
-    } else if (defstr.startsWith("$parent.") && parentValue instanceof Object) {
-      const property = defstr.substr(8);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      output = (parentValue as any)[property];
-    }
-  } else {
-    output = await getCallFuncValue(inputs, false, defaultValue as Func, remoteFuncExecutor);
-  }
-  return output;
-}
 
 export function isAutoSkipSelect(q: Question): boolean {
   if (q.type === NodeType.singleSelect || q.type === NodeType.multiSelect) {
@@ -53,7 +31,7 @@ export function isAutoSkipSelect(q: Question): boolean {
   return false;
 }
 
-export async function loadOptions(q: Question, inputs: Inputs , remoteFuncExecutor?: RemoteFuncExecutor): Promise<{autoSkip:boolean, options?: StaticOption}> {
+export async function loadOptions(q: Question, inputs: Inputs): Promise<{autoSkip:boolean, options?: StaticOption}> {
   if (q.type === NodeType.singleSelect || q.type === NodeType.multiSelect) {
     const selectQuestion = q as (SingleSelectQuestion | MultiSelectQuestion);
     let option: Option = [];
@@ -61,7 +39,7 @@ export async function loadOptions(q: Question, inputs: Inputs , remoteFuncExecut
       //StaticOption
       option = selectQuestion.option;
     } else {
-      option = await getCallFuncValue(inputs, false, selectQuestion.option as Func, remoteFuncExecutor) as StaticOption;
+      option = await getCallFuncValue(inputs, selectQuestion.option) as StaticOption;
     }
     if (selectQuestion.skipSingleOption && option.length === 1) {
       return {autoSkip:true, options: option};
@@ -79,8 +57,8 @@ export function getSingleOption(q: SingleSelectQuestion | MultiSelectQuestion, o
   if(!option) option = q.option as StaticOption;
   const optionIsString = typeof option[0] === "string";
   let returnResult;
-  if (q.returnObject) {
-    returnResult = optionIsString ? { id: option[0] } : option[0];
+  if (!optionIsString && q.returnObject === true) {
+    returnResult = option[0];
   }
   else {
     returnResult = optionIsString ? option[0] : (option[0] as OptionItem).id;
@@ -95,29 +73,16 @@ export function getSingleOption(q: SingleSelectQuestion | MultiSelectQuestion, o
 
 type QuestionVistor = (
   question: Question,
-  parentValue: unknown,
   ui: UserInterface,
-  backButton: boolean,
   inputs: Inputs ,
-  remoteFuncExecutor?: RemoteFuncExecutor,
   step?: number,
   totalSteps?: number,
 ) => Promise<InputResult>;
  
 
-async function getCallFuncValue(inputs: Inputs , throwError: boolean,  raw?: string | string[] | number | Func, remoteFuncExecutor?: RemoteFuncExecutor):Promise<unknown>{
-  if(raw){
-    if((raw as Func).method) {
-      if(remoteFuncExecutor){
-        const res = await remoteFuncExecutor(raw as Func, inputs);
-        if (res.isOk()) {
-          return res.value;
-        }
-        else if(throwError){
-          throw res.error;
-        }
-      }
-    }
+async function getCallFuncValue(inputs: Inputs , raw?: unknown ):Promise<unknown>{
+  if(raw && typeof raw === "function") {
+    return await raw(inputs);
   }
   return raw;
 }
@@ -130,51 +95,40 @@ async function getCallFuncValue(inputs: Inputs , throwError: boolean,  raw?: str
  */
 const questionVisitor: QuestionVistor = async function (
   question: Question,
-  parentValue: unknown,
   ui: UserInterface,
-  backButton: boolean,
   inputs: Inputs ,
-  remoteFuncExecutor?: RemoteFuncExecutor,
   step?: number,
   totalSteps?: number,
-): Promise<InputResult> {
-  const type = question.type;
-  //FunctionCallQuestion
-  if (type === NodeType.func) {
-    if (remoteFuncExecutor) {
-      const res = await remoteFuncExecutor(question as Func, inputs);
-      if (res.isOk()) {
-        return { type: InputResultType.sucess, result: res.value };
-      }
-      else {
-        return { type: InputResultType.error, error: res.error };
-      }
-    }
+): Promise<InputResult> {  
+  if (question.type === NodeType.func) {
+     const funcQuestion = question as FuncQuestion;
+     return await ui.showFuncQuestion({
+      title: funcQuestion.title || funcQuestion.name,
+      step: step,
+      totalSteps: totalSteps,
+      func: funcQuestion
+     });
   } else {
-    if (type === NodeType.text || type === NodeType.password || type === NodeType.number) {
+    const defaultValue = question.value? question.value : await getCallFuncValue(inputs, question.default);
+    if (question.type === NodeType.text || question.type === NodeType.number) {
       const inputQuestion: TextInputQuestion | NumberInputQuestion = question as (TextInputQuestion | NumberInputQuestion);
-      const validationFunc = inputQuestion.validation ? getValidationFunction(inputQuestion.validation, inputs, remoteFuncExecutor) : undefined;
-      const title = await getCallFuncValue(inputs, false, inputQuestion.title, remoteFuncExecutor) as string;
-      const placeholder = await getCallFuncValue(inputs, false, inputQuestion.placeholder, remoteFuncExecutor) as string;
-      const prompt = await getCallFuncValue(inputs, false, inputQuestion.prompt, remoteFuncExecutor) as string;
-      const defaultValue = inputQuestion.value? inputQuestion.value : await getRealValue(parentValue, question.default, inputs, remoteFuncExecutor);
+      const validationFunc = inputQuestion.validation ? getValidationFunction(inputQuestion.validation, inputs) : undefined;
+      const placeholder = await getCallFuncValue(inputs, inputQuestion.placeholder) as string;
+      const prompt = await getCallFuncValue(inputs, inputQuestion.prompt) as string;
       return await ui.showInputBox({
-        title: title,
-        password: !!(type === NodeType.password),
+        title: question.title,
+        password: (inputQuestion as TextInputQuestion).password,
         defaultValue: defaultValue as string,
         placeholder: placeholder,
         prompt: prompt,
         validation: validationFunc,
-        backButton: backButton,
-        number: !!(type === NodeType.number),
-        // step: step,
-        // totalSteps: totalSteps
+        number: !!(question.type === NodeType.number),
+        step: step,
+        totalSteps: totalSteps
       });
-    } else if (type === NodeType.singleSelect || type === NodeType.multiSelect) {
-      const selectQuestion: SingleSelectQuestion | MultiSelectQuestion = question as
-        | SingleSelectQuestion
-        | MultiSelectQuestion;
-      const res = await loadOptions(selectQuestion, inputs, remoteFuncExecutor);
+    } else if (question.type === NodeType.singleSelect || question.type === NodeType.multiSelect) {
+      const selectQuestion: SingleSelectQuestion | MultiSelectQuestion = question as | SingleSelectQuestion | MultiSelectQuestion;
+      const res = await loadOptions(selectQuestion, inputs);
       if (!res.options || res.options.length === 0) {
         return {
           type: InputResultType.error,
@@ -185,7 +139,6 @@ const questionVisitor: QuestionVistor = async function (
           )
         };
       }
-
       // Skip single/mulitple option select
       if (res.autoSkip === true) {
         const returnResult = getSingleOption(selectQuestion, res.options);
@@ -194,43 +147,40 @@ const questionVisitor: QuestionVistor = async function (
           result: returnResult
         };
       }
-      const title = await getCallFuncValue(inputs, false, selectQuestion.title, remoteFuncExecutor) as string;
-      const placeholder = await getCallFuncValue(inputs, false, selectQuestion.placeholder, remoteFuncExecutor) as string;
-      const defaultValue = selectQuestion.value? selectQuestion.value : await getRealValue(parentValue, selectQuestion.default, inputs, remoteFuncExecutor);
+      const placeholder = await getCallFuncValue(inputs, selectQuestion.placeholder) as string;
+      const mq = (selectQuestion as MultiSelectQuestion);
+      const validationFunc = mq.validation ? getValidationFunction( mq.validation, inputs) : undefined;
       return await ui.showQuickPick({
-        title: title,
+        title: question.title,
         items: res.options,
-        canSelectMany: !!(type === NodeType.multiSelect),
+        canSelectMany: !!(question.type === NodeType.multiSelect),
         returnObject: selectQuestion.returnObject,
         defaultValue: defaultValue as (string | string[]),
         placeholder: placeholder,
-        backButton: backButton,
-        onDidChangeSelection: type === NodeType.multiSelect ? (selectQuestion as MultiSelectQuestion).onDidChangeSelection : undefined,
-        // step: step,
-        // totalSteps: totalSteps
+        onDidChangeSelection: question.type === NodeType.multiSelect ? (selectQuestion as MultiSelectQuestion).onDidChangeSelection : undefined,
+        step: step,
+        totalSteps: totalSteps,
+        validation: validationFunc
       });
-    } else if (type === NodeType.folder) {
+    } else if (question.type === NodeType.file) {
       const fileQuestion: FileQuestion = question as FileQuestion;
-      const validationFunc = fileQuestion.validation ? getValidationFunction(fileQuestion.validation, inputs, remoteFuncExecutor) : undefined;
-      const title = await getCallFuncValue(inputs, false, fileQuestion.title, remoteFuncExecutor) as string;
-      const defaultValue = fileQuestion.value? fileQuestion.value : await getRealValue(parentValue, fileQuestion.default, inputs, remoteFuncExecutor);
+      const validationFunc = fileQuestion.validation ? getValidationFunction(fileQuestion.validation, inputs) : undefined;
       return await ui.showFileOpenDialog({
-        defaultUri: fileQuestion.value || defaultValue as string | undefined,
+        defaultUri: defaultValue as string,
         canSelectFiles: false,
         canSelectFolders: true,
         canSelectMany: false,
-        title: title,
+        title: question.title,
         validation: validationFunc,
-        backButton: backButton,
-        // step: step,
-        // totalSteps: totalSteps
+        step: step,
+        totalSteps: totalSteps
       });
     }
   }
   return {
     type: InputResultType.error,
     error: returnUserError(
-      new Error(`Unsupported question node type:${question.type}`),
+      new Error(`Unsupported question node type:${JSON.stringify(question)}`),
       "API.qm",
       "UnsupportedNodeType"
     )
@@ -240,8 +190,7 @@ const questionVisitor: QuestionVistor = async function (
 export async function traverse(
   root: QTreeNode,
   inputs: Inputs ,
-  ui: UserInterface,
-  remoteFuncExecutor?: RemoteFuncExecutor
+  ui: UserInterface
 ): Promise<InputResult> {
   const stack: QTreeNode[] = [];
   const history: QTreeNode[] = [];
@@ -262,10 +211,9 @@ export async function traverse(
         if (sq.returnObject) {
           parentValue = (sq.value as OptionItem).id;
         }
-      }
-      const valueToValidate = curr.condition.target ? await getRealValue(parentValue, curr.condition.target, inputs, remoteFuncExecutor) : parentValue;
-      if (valueToValidate) {
-        const validRes = await validate(curr.condition, valueToValidate as string | string[], inputs, remoteFuncExecutor);
+      } 
+      if (parentValue) {
+        const validRes = await validate(curr.condition, parentValue as string | string[] | number, inputs);
         if (validRes !== undefined) {
           continue;
         }
@@ -278,7 +226,7 @@ export async function traverse(
       if (!firstQuestion) firstQuestion = question;
       ++ step;
       totalSteps = step + stack.length;
-      const inputResult = await questionVisitor(question, parentValue, ui, question !== firstQuestion, inputs, remoteFuncExecutor, step, totalSteps);
+      const inputResult = await questionVisitor(question, ui, inputs, step, totalSteps);
       if (inputResult.type === InputResultType.back) {
         //go back
         if (curr.children) {
@@ -312,7 +260,7 @@ export async function traverse(
           -- step;
           let autoSkip = false;
           if(last.data.type === NodeType.singleSelect || last.data.type === NodeType.multiSelect){
-            const loadOptionRes = await loadOptions(last.data, inputs, remoteFuncExecutor);
+            const loadOptionRes = await loadOptions(last.data, inputs);
             autoSkip = loadOptionRes.autoSkip;
           }
           
@@ -352,26 +300,6 @@ export async function traverse(
         if (!child) continue;
         parentMap.set(child, curr);
         stack.push(child);
-
-        // if(child.data.type === NodeType.func || child.data.type === NodeType.group) //ignore non-input node
-        //   continue;
-        // if (child.condition) {  //ignore node to skip
-        //   let currValue = curr.data.type !== NodeType.group ? curr.data.value : undefined;
-        //   if (curr.data.type === NodeType.singleSelect) {
-        //     const csq:SingleSelectQuestion = curr.data;
-        //     if (csq.returnObject) {
-        //       currValue = (csq.value as OptionItem).id;
-        //     }
-        //   }
-        //   const valueToValidate = child.condition.target ? await getRealValue(currValue, child.condition.target, inputs, remoteFuncExecutor) : currValue;
-        //   if (valueToValidate) {
-        //     const validRes = await validate(child.condition, valueToValidate as string | string[], inputs, remoteFuncExecutor);
-        //     if (validRes !== undefined) {
-        //       continue;
-        //     }
-        //   }
-        // }
-        // ++ totalSteps;
       }
     }
   }

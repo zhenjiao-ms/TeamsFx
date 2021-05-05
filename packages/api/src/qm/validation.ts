@@ -3,67 +3,44 @@
 
 import {
   FileValidation,
-  RemoteFuncValidation,
-  LocalFuncValidation,
+  FuncValidation,
   NumberValidation,
   StringArrayValidation,
   StringValidation,
-  Validation,
-  Func
+  ValidationSchema
 } from "./question";
 import * as fs from "fs-extra";
 import * as jsonschema from "jsonschema"; 
-import { Result } from "neverthrow";
-import { FxError } from "../error";
 import { Inputs } from "../types";
- 
-
-export type RemoteFuncExecutor = (func:Func, answers: Inputs) => Promise<Result<unknown, FxError>>; 
-
+  
 export function getValidationFunction(
-  validation: Validation,
-  outputs: Inputs,
-  remoteFuncValidator?: RemoteFuncExecutor,
-): (input: string | string[]) => Promise<string | undefined> {
-  return async function(input: string | string[]): Promise<string | undefined> {
-    return await validate(validation, input, outputs, remoteFuncValidator);
+  validation: ValidationSchema,
+  inputs: Inputs
+): (input: string | string[] | number)  => Promise<string | undefined> {
+  return async function(input: string | string[] | number): Promise<string | undefined> {
+    return await validate(validation, input, inputs);
   };
 }
 
 export async function validate(
-  validation: Validation,
-  valueToValidate: string | string[],
-  inputs: Inputs,
-  remoteFuncValidator?: RemoteFuncExecutor
+  validSchema: ValidationSchema,
+  value: string | string[] | number,
+  inputs: Inputs
 ): Promise<string | undefined> {
-  //RemoteFuncValidation
-  {
-    const funcValidation: RemoteFuncValidation = validation as RemoteFuncValidation;
-    if (funcValidation.method && remoteFuncValidator) {
-      funcValidation.params = valueToValidate as string; 
-      const res = await remoteFuncValidator(funcValidation as Func, inputs);
-      if (res.isOk()) {
-        return res.value as string;
-      } else {
-        return undefined; // when callFunc failed, skip the validation
-      }
-    }
-  }
-
   {
     //LocalFuncValidation
-    const localFuncValidation: LocalFuncValidation = validation as LocalFuncValidation;
+    const localFuncValidation: FuncValidation = validSchema as FuncValidation;
     if (localFuncValidation.validFunc) {
-      const res = await localFuncValidation.validFunc(valueToValidate as string);
+      const res = await localFuncValidation.validFunc(value, inputs);
       return res as string;
     }
   }
 
   {
     //FileValidation
-    const fileValidation: FileValidation = validation as FileValidation;
+    const fileValidation: FileValidation = validSchema as FileValidation;
     if (fileValidation.exists !== undefined) {
-      const path = valueToValidate as string;
+      const path = value as string;
       if (!path) {
         return `file path should not be empty!`;
       }
@@ -77,8 +54,8 @@ export async function validate(
 
   {
     // StringValidation
-    const stringValidation: StringValidation = validation as StringValidation;
-    const strToValidate = valueToValidate as string;
+    const stringValidation: StringValidation = validSchema as StringValidation;
+    const strToValidate = value as string;
     if (typeof strToValidate === "string") {
       
       const schema: any = {};
@@ -94,7 +71,7 @@ export async function validate(
       if (stringValidation.maxLength) schema.maxLength = stringValidation.maxLength;
       if (stringValidation.pattern) schema.pattern = stringValidation.pattern;
       if (Object.keys(schema).length > 0) {
-        const validateResult = jsonschema.validate(valueToValidate, schema);
+        const validateResult = jsonschema.validate(value, schema);
         if (validateResult.errors && validateResult.errors.length > 0) {
           return `'${strToValidate}' ${validateResult.errors[0].message}`;
         }
@@ -120,8 +97,8 @@ export async function validate(
 
   //NumberValidation
   {
-    const numberValidation: NumberValidation = validation as NumberValidation;
-    const numberToValidate = Number(valueToValidate);
+    const numberValidation: NumberValidation = validSchema as NumberValidation;
+    const numberToValidate = Number(value);
     const schema: any = {};
     if (numberValidation.equals && typeof numberValidation.equals === "number")
       schema.const = numberValidation.equals;
@@ -148,8 +125,8 @@ export async function validate(
 
   //StringArrayValidation
   {
-    const stringArrayValidation: StringArrayValidation = validation as StringArrayValidation;
-    const arrayToValidate = valueToValidate as string[];
+    const stringArrayValidation: StringArrayValidation = validSchema as StringArrayValidation;
+    const arrayToValidate = value as string[];
     if (arrayToValidate instanceof Array) {
       const schema: any = {};
       if (stringArrayValidation.maxItems) schema.maxItems = stringArrayValidation.maxItems;

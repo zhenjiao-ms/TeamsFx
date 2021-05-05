@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
-import { FileQuestion, NodeType, Question, SingleSelectQuestion, TextInputQuestion } from "fx-api";
+import { FileQuestion, Inputs, NodeType, SingleSelectQuestion, StaticOption, TextInputQuestion } from "fx-api";
+import * as jsonschema from "jsonschema";
+import * as path from "path";
+import * as fs from "fs-extra";
 
 export enum CoreQuestionNames {
     AppName = "app-name",
@@ -18,19 +21,29 @@ export const QuestionAppName: TextInputQuestion = {
     name: CoreQuestionNames.AppName,
     title: "App Name",
     validation: {
-        pattern: "^[\\da-zA-Z]+$",
+        validFunc : async (input: string|string[]|number, answer: Inputs) : Promise<string | undefined> => {
+            const folder = answer[CoreQuestionNames.Foler] as string;
+            if(!folder) return undefined;
+            const schema = {
+                pattern: "^[\\da-zA-Z]+$",
+            };
+            const validateResult = jsonschema.validate(input as string, schema);
+            if (validateResult.errors && validateResult.errors.length > 0) {
+                return `project name doesn't match pattern: ${schema.pattern}`;
+            }
+            const projectPath = path.resolve(folder, input as string);
+            const exists = await fs.pathExists(projectPath);
+            if (exists) return `Project path already exists:${projectPath}, please change a different project name.`;
+            return undefined;
+        }
     },
     default: "myapp",
 };
 
 export const QuestionRootFolder: FileQuestion = {
-    type: NodeType.folder,
+    type: NodeType.file,
     name: CoreQuestionNames.Foler,
-    title: "Select root folder of the project",
-    validation: {
-        namespace: "",
-        method: "validateFolder",
-    },
+    title: "Select root folder of the project"
 };
 
 export const QuestionSelectSolution: SingleSelectQuestion = {
@@ -46,10 +59,6 @@ export const QuestionEnvName: TextInputQuestion = {
     type: NodeType.text,
     name: CoreQuestionNames.EnvName,
     title: "Environment Name",
-    validation: {
-        namespace: "",
-        method:"validateEnvName"
-    },
     default: "myenv",
 };
 
@@ -71,8 +80,7 @@ export const QuestionSelectEnv: SingleSelectQuestion = {
     type: NodeType.singleSelect,
     name: CoreQuestionNames.EnvName,
     title: "Select an environment",
-    option: {
-        namespace: "",
-        method:"listEnv"
+    option: async (inputs: Inputs) : Promise<StaticOption|undefined> =>{
+        return undefined;
     }
 };

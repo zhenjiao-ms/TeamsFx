@@ -3,7 +3,6 @@
 "use strict";
 
 import {
-  Func,
   FxError,
   ok,
   QTreeNode,
@@ -231,18 +230,7 @@ export class FxCore implements Core {
     const coreContext = await this.loadCoreContext(inputs.projectPath);
     return await Executor.getQuestionsForUserTask(coreContext, router, inputs);
   }
-
-  @hooks([errorHandlerMW])
-  public async executeUserTask(func: Func, inputs: Inputs): Promise<Result<unknown, FxError>> {
-    const coreContext = await this.loadCoreContext(inputs.projectPath);
-    return await Executor.executeUserTask(coreContext, func, inputs);
-  }
-
-  @hooks([errorHandlerMW])
-  public async executeQuestionFlowFunction(func:Func, inputs: Inputs) : Promise<Result<unknown, FxError>>{
-    const coreContext = await this.loadCoreContext(inputs.projectPath);
-    return await Executor.executeQuestionFlowFunction(coreContext, func, inputs);
-  }
+ 
 
   @hooks([errorHandlerMW])
   public async getProjectConfigs(inputs: Inputs) : Promise<Result<ProjectConfigs, FxError>>{

@@ -1,4 +1,4 @@
-import { Func, FunctionRouter, FxError, Inputs, ok, QTreeNode, ResourceTemplates, Result, SolutionAllContext, SolutionContext, SolutionEnvContext, SolutionPlugin, Task, ResourceInstanceValues, Void, ResourceEnvResult } from "fx-api";
+import {FunctionRouter, FxError, Inputs, ok, QTreeNode, ResourceTemplates, Result, SolutionAllContext, SolutionContext, SolutionEnvContext, SolutionPlugin, Task, Void, ResourceEnvResult } from "fx-api";
 
 
 export class DefaultSolution implements  SolutionPlugin{
@@ -58,10 +58,10 @@ export class DefaultSolution implements  SolutionPlugin{
     async getQuestionsForUserTask(ctx: SolutionAllContext, router: FunctionRouter, inputs: Inputs) : Promise<Result<QTreeNode|undefined, FxError>>{
         return ok(undefined);
     }
-    async executeUserTask(ctx: SolutionAllContext, func:Func, inputs: Inputs) : Promise<Result<unknown, FxError>>{
-        return ok(Void);
-    }
-    async executeFuncQuestion(ctx: SolutionAllContext, func:Func, inputs: Inputs) :Promise<Result<unknown, FxError>>{
-        return ok(Void);
-    }
+    // async executeUserTask(ctx: SolutionAllContext, func:Func, inputs: Inputs) : Promise<Result<unknown, FxError>>{
+    //     return ok(Void);
+    // }
+    // async executeFuncQuestion(ctx: SolutionAllContext, func:Func, inputs: Inputs) :Promise<Result<unknown, FxError>>{
+    //     return ok(Void);
+    // }
 }
