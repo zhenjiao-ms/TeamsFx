@@ -95,7 +95,7 @@ export async function getLocalDebugTeamsAppId(isLocalSideloadingConfiguration: b
     params: isLocalSideloadingConfiguration ? "local" : "remote"
   };
   try {
-    const result = await core.executeQuestionFlowFunction(func, globalInputs);
+    const result = await core.executeUserTask(func, globalInputs);
     if (result.isErr()) {
       throw result.error;
     }

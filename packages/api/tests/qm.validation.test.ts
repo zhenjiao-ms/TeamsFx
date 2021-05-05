@@ -3,39 +3,17 @@
 
 import {
   FileValidation,
-  Func,
-  FxError,
-  LocalFuncValidation,
   NumberValidation,
-  ok,
-  Platform,
-  Inputs,
-  RemoteFuncValidation,
-  Result,
   StringArrayValidation,
   StringValidation,
-  UserInputs
+  FuncValidation
 } from "../src/index";
 import * as chai from "chai";
-import { RemoteFuncExecutor, validate } from "../src/qm/validation";
+import { validate } from "../src/qm/validation";
 import * as fs from "fs-extra";
 import * as os from "os";
 import * as path from "path";
-
-/**
- * cmd: mocha -r ts-node/register --no-timeout tests/qm.validation.test.ts
- */
-
-const mockRemoteFuncExecutor:RemoteFuncExecutor = async function (func:Func, answers: Inputs) : Promise<Result<string|undefined, FxError>>
-{
-  if(func.method === "mockValidator"){
-    const input = func.params as string;
-    if(input.length > 5) return ok("input too long");
-    else return ok(undefined);
-  }
-  return ok(undefined);
-};
-
+ 
 
 describe("Question Model - Validation Test", () => {
   describe("StringValidation", () => {
@@ -379,12 +357,10 @@ describe("Question Model - Validation Test", () => {
     });
   });
 
-  
-   
-  it("LocalFuncValidation", async () => {
-    const validation: LocalFuncValidation = {
-      validFunc: function(input: string): string | undefined | Promise<string | undefined> {
-        if (input.length > 5) return "length > 5";
+  it("FuncValidation", async () => {
+    const validation: FuncValidation = {
+      validFunc: function(input: string|string[]|number): string | undefined | Promise<string | undefined> {
+        if ((input as string).length > 5) return "length > 5";
         return undefined;
       }
     };
@@ -398,6 +374,7 @@ describe("Question Model - Validation Test", () => {
     const res3 = await validate(validation, value3);
     chai.assert.isTrue(res3 === undefined);
   });
+
   describe("FileValidation", () => {
     it("exists", async () => {
       const validation: FileValidation = {
@@ -432,20 +409,5 @@ describe("Question Model - Validation Test", () => {
       const res3 = await validate(validation, filePath);
       chai.assert.isTrue( res3 === undefined);
     });
-  });
-
-  it("RemoteFuncValidation", async () => {
-    const validation:RemoteFuncValidation = {
-      namespace : "",
-      method : "mockValidator"
-    };
-    const answers:UserInputs = {platform:Platform.VSCode};
-    answers["app-name"] = "myapp";
-    const value1 = "1234888888888888888856";
-    const res1 = await validate(validation, value1, mockRemoteFuncExecutor, answers);
-    chai.assert.isTrue(res1 === "input too long");
-    const value2 = "1234";
-    const res2 = await validate(validation, value2, mockRemoteFuncExecutor, answers);
-    chai.assert.isTrue(res2 === undefined);
   });
 });

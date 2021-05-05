@@ -25,7 +25,8 @@ import {
   ResourceTemplate,
   ResourceInstanceValues,
   StateValues,
-  ProjectConfigs
+  ProjectConfigs,
+  Func
 } from "fx-api";
 import { hooks } from "@feathersjs/hooks";
 import { concurrentMW } from "./middlewares/concurrent";
@@ -231,6 +232,11 @@ export class FxCore implements Core {
     return await Executor.getQuestionsForUserTask(coreContext, router, inputs);
   }
  
+  @hooks([errorHandlerMW])
+  public async executeUserTask(func: Func, inputs: Inputs): Promise<Result<unknown, FxError>> {
+    const coreContext = await this.loadCoreContext(inputs.projectPath);
+    return await Executor.executeUserTask(coreContext, func, inputs);
+  }
 
   @hooks([errorHandlerMW])
   public async getProjectConfigs(inputs: Inputs) : Promise<Result<ProjectConfigs, FxError>>{

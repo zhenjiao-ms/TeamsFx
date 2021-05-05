@@ -28,10 +28,10 @@ export async function validate(
   inputs: Inputs
 ): Promise<string | undefined> {
   {
-    //LocalFuncValidation
-    const localFuncValidation: FuncValidation = validSchema as FuncValidation;
-    if (localFuncValidation.validFunc) {
-      const res = await localFuncValidation.validFunc(value, inputs);
+    //FuncValidation
+    const funcValidation: FuncValidation = validSchema as FuncValidation;
+    if (funcValidation.validFunc) {
+      const res = await funcValidation.validFunc(value, inputs);
       return res as string;
     }
   }

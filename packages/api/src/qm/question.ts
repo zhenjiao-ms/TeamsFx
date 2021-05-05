@@ -26,6 +26,11 @@ export interface FunctionRouter{
     method:string
 }
 
+export interface Func extends FunctionRouter{
+    params?: unknown;
+}
+
+export type LocalFunc<T> = (inputs: Inputs) => T | Promise< T >;
 
 export interface OptionItem {
     /**
@@ -48,9 +53,13 @@ export interface OptionItem {
      * hidden data for this option item, not show
      */
     data?: unknown;
+    /**
+     * CLI diplay name, will use id instead if cliname not exist.
+     */
+    cliName?: string;
 }
 
-export type LocalFunc<T> = (inputs: Inputs) => T | Promise< T >;
+
 
 /**
  * static option can be string array or OptionItem array
@@ -133,7 +142,7 @@ export interface FileValidation extends AnyValidation {
 /**
  * The validation is checked by a validFunc provided by user
  */
-export interface FuncValidation extends AnyValidation {
+export interface FuncValidation {
     validFunc?: (input: string|string[]|number, previousInputs: Inputs) => string | undefined | Promise<string | undefined>;
 }
 
@@ -160,8 +169,11 @@ export interface BaseQuestion {
 
 export interface UserInputQuestion extends BaseQuestion{
     type: NodeType.singleSelect | NodeType.multiSelect | NodeType.file | NodeType.text | NodeType.number;
-    title: string ;
+    title:string ;
+    placeholder?: string | LocalFunc<string | undefined>;
+    prompt?: string | LocalFunc<string | undefined>;
     default?: string | string[] | number | LocalFunc<string | string[] | number| undefined>;
+    validation?: ValidationSchema;
 }
 
 export interface SingleSelectQuestion extends UserInputQuestion {
@@ -182,12 +194,7 @@ export interface SingleSelectQuestion extends UserInputQuestion {
      * The default selected `id` value of the option item
      */
     default?: string | LocalFunc<string | undefined>;
-    
-    /**
-     * placeholder text
-     */
-    placeholder?: string | LocalFunc<string | undefined>;
-    
+
     /**
      * works for string[] option
      */
@@ -220,11 +227,6 @@ export interface MultiSelectQuestion extends UserInputQuestion {
     default?: string[] | LocalFunc<string[] | undefined>;
 
     /**
-     * placeholder text
-     */
-    placeholder?: string | LocalFunc<string | undefined>;
-    
-    /**
      * whether to return `OptionItem` or `OptionItem[]` if the items have type `OptionItem[]`
      * if the items has type `string[]`, this config will not take effect, the answer has type `string` or `string[]`
      */
@@ -247,26 +249,9 @@ export interface MultiSelectQuestion extends UserInputQuestion {
 
 export interface TextInputQuestion extends UserInputQuestion {
     type: NodeType.text;
-
     password?: boolean; 
-
     value?: string;
-
-    /**
-     * default value can be static string or dynamic string returned by function call
-     */
     default?: string | LocalFunc<string | undefined>;
-
-    /**
-     * placeholder text
-     */
-    placeholder?: string | LocalFunc<string | undefined>;
-
-    /**
-     * prompt text
-     */
-    prompt?: string | LocalFunc<string | undefined>;
-
     validation?: StringValidation | FuncValidation;
 }
 
@@ -278,8 +263,6 @@ export interface NumberInputQuestion extends UserInputQuestion {
     type: NodeType.number;
     value?: number;
     default?: number | LocalFunc<number | undefined>;
-    placeholder?: string | LocalFunc<string | undefined>;
-    prompt?: string | LocalFunc<string | undefined>;
     validation?: NumberValidation | FuncValidation;
 }
 

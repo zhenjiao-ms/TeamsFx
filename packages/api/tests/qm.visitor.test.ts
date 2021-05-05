@@ -5,8 +5,6 @@ import {
   Func,
   FxError,
   FxInputBoxOption,
-  FxOpenDialogOption,
-  FxQuickPickOption,
   InputResult,
   InputResultType,
   NodeType,
@@ -18,25 +16,17 @@ import {
   Result,
   SingleSelectQuestion,
   traverse,
-  UserInputs,
-  UserInterface
+  UserInterface,
+  FxSingleQuickPickOption,
+  FxFileSelectorOption,
+  FxMultiQuickPickOption
 } from "../src/index";
 import * as chai from "chai";
-import { RemoteFuncExecutor } from "../src/qm/validation";
 
 /**
  * cmd: mocha -r ts-node/register --no-timeout tests/qm.visitor.test.ts
  */
 
-const mockRemoteFuncExecutor:RemoteFuncExecutor = async function (func:Func, answers: Inputs) : Promise<Result<string|undefined, FxError>>
-{
-  if(func.method === "mockValidator"){
-    const input = func.params as string;
-    if(input.length > 5) return ok("input too long");
-    else return ok(undefined);
-  }
-  return ok(undefined);
-};
 
 function createSingleSelectioNode(id:string, optionLength:number, stringOption:boolean):QTreeNode{
   const question:SingleSelectQuestion = {
@@ -59,7 +49,21 @@ describe("Question Model - Traverse Test", () => {
     const titleTrace:(string|undefined)[] = [];
     const selectTrace:(string|undefined)[] = [];
     const mockUi:UserInterface = {
-      showQuickPick: async function(option: FxQuickPickOption):Promise<InputResult> {
+      showSingleQuickPick: async function(option: FxSingleQuickPickOption):Promise<InputResult> {
+        titleTrace.push(option.title);
+        const index:number = Math.floor(Math.random() * option.items.length);	
+        const result = option.items[index];
+        const optionIsString = typeof result === "string";
+        const returnId = optionIsString ? result as string : (result as OptionItem).id;
+        selectTrace.push(returnId);
+        if(option.returnObject){
+          return {type: InputResultType.sucess, result: optionIsString ? {id:result} : result};
+        }
+        else {
+          return {type: InputResultType.sucess, result: returnId};
+        }
+      },
+      showMultiQuickPick: async function(option: FxMultiQuickPickOption):Promise<InputResult> {
         titleTrace.push(option.title);
         const index:number = Math.floor(Math.random() * option.items.length);	
         const result = option.items[index];
@@ -77,7 +81,7 @@ describe("Question Model - Traverse Test", () => {
         titleTrace.push(option.title);
         return { type: InputResultType.sucess, result: "ok"};
       },
-      showOpenDialog: async function(option: FxOpenDialogOption):Promise<InputResult> {
+      showFileSelector: async function(option: FxFileSelectorOption):Promise<InputResult> {
         titleTrace.push(option.title);
         return { type: InputResultType.sucess, result: "ok"};
       }

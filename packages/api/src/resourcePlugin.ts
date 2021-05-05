@@ -3,7 +3,7 @@
 "use strict";
   
 import { Result } from "neverthrow"; 
-import { ResourceSetting, ResourceState,Context, EnvMeta, FunctionRouter, FxError, Inputs, QTreeNode, ReadonlyResourceConfig, ReadonlyResourceConfigs, ResourceConfig, ResourceTemplate, Task, TokenProvider, Void, SolutionAllContext, ResourceEnvResult } from "./index";
+import { ResourceSetting, ResourceState,Context, EnvMeta, FunctionRouter, FxError, Inputs, QTreeNode, ReadonlyResourceConfig, ReadonlyResourceConfigs, ResourceConfig, ResourceTemplate, Task, TokenProvider, Void, SolutionAllContext, ResourceEnvResult, Func } from "./index";
 
 
 export interface ResourceContext extends Context {
@@ -96,4 +96,9 @@ export interface ResourcePlugin {
      * get question model for plugin customized {@link Task}, Questions are organized as a tree. Please check {@link QTreeNode}.
      */
     getQuestionsForUserTask?: (ctx: ResourceAllContext, router: FunctionRouter, inputs: Inputs) => Promise<Result<QTreeNode | undefined, FxError>>;
+
+    /**
+     * execute user customized task, for example `Add Resource`, `Add Capabilities`, etc
+     */
+     executeUserTask?: (ctx: ResourceAllContext, func:Func, inputs: Inputs) => Promise<Result<unknown, FxError>>;
 }

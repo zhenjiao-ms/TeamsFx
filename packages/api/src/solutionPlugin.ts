@@ -3,7 +3,7 @@
 "use strict";
 
 import { Result } from "neverthrow";  
-import { Context, SolutionSetting, SolutionState, EnvMeta, FunctionRouter, FxError, Inputs, QTreeNode, ResourceConfigs, ResourceTemplates, Task, TokenProvider, Void, ResourceInstanceValues, StateValues } from "./index";
+import { Context, SolutionSetting, SolutionState, EnvMeta, FunctionRouter, FxError, Inputs, QTreeNode, ResourceConfigs, ResourceTemplates, Task, TokenProvider, Void, ResourceInstanceValues, StateValues, Func } from "./index";
 
 
 
@@ -79,4 +79,9 @@ export interface SolutionPlugin {
      * get question model for plugin customized {@link Task}, Questions are organized as a tree. Please check {@link QTreeNode}.
      */
     getQuestionsForUserTask?: (ctx: SolutionAllContext, router: FunctionRouter, inputs: Inputs) => Promise<Result<QTreeNode|undefined, FxError>>;
+
+    /**
+     * execute user customized task, for example `Add Resource`, `Add Capabilities`, etc
+     */
+    executeUserTask?: (ctx: SolutionAllContext, func:Func, inputs: Inputs) => Promise<Result<unknown, FxError>>;
 }

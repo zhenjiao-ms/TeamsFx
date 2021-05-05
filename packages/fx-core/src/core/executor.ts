@@ -26,6 +26,7 @@ import {
   OptionItem,
   ResourceEnvResult,
   ProjectConfigs,
+  Func,
 } from "fx-api";
 import { hooks } from "@feathersjs/hooks";
 import { writeConfigMW } from "./middlewares/config";
@@ -214,51 +215,27 @@ export class Executor {
   }
 
 
-  // @hooks([projectTypeCheckerMW, writeConfigMW])
-  // static async executeQuestionFlowFunction( ctx: CoreContext, func:Func, inputs: Inputs ): Promise<Result<unknown, FxError>> {
-  //   const namespace = func.namespace;
-  //   const array = namespace ? namespace.split("/") : [];
-  //   if (!namespace || "" === namespace || array.length === 0) {
-  //     if (func.method === "validateFolder") {
-  //       if (!func.params) return ok(undefined);
-  //       return await this.validateFolder(func.params as string, inputs);
-  //     }
-  //     else if (func.method === "listEnv") {
-  //       const options:OptionItem[] = [];
-  //       for(const k of Object.keys(ctx.projectSetting.environments)){
-  //         const envMeta = ctx.projectSetting.environments[k];
-  //         options.push({
-  //           id: envMeta.name,
-  //           label: envMeta.name,
-  //           description: `local:${envMeta.local}, sideloading:${envMeta.sideloading}`
-  //         });
-  //       }
-  //       return ok(options);
-  //     }
-  //     else if (func.method === "validateEnvName") {
-  //       const envName = func.params as string;
-  //       if(ctx.projectSetting.environments[envName])
-  //         return ok(`enviroment already exist!`);
-  //       else 
-  //         return ok(undefined);
-  //     }
-  //   } else {
-  //     const solutionName = array[0];
-  //     const solution = ctx.globalSolutions.get(solutionName);
-  //     if (solution && solution.executeQuestionFlowFunction) {
-  //       const solutionContext = this.createSolutionAllContext(ctx);
-  //       ctx.solutionContext = solutionContext;
-  //       return await solution.executeQuestionFlowFunction(solutionContext, func, inputs);
-  //     }
-  //   }
-  //   return err(
-  //     returnUserError(
-  //       new Error(`CallFuncRouteFailed:${JSON.stringify(func)}`),
-  //       error.CoreSource,
-  //       error.CoreErrorNames.CallFuncRouteFailed
-  //     )
-  //   );
-  // }
+  @hooks([projectTypeCheckerMW, writeConfigMW])
+  static async executeUserTask( ctx: CoreContext,  func: Func, inputs: Inputs ): Promise<Result<unknown, FxError>> {
+    const namespace = func.namespace;
+    const array = namespace ? namespace.split("/") : [];
+    if ("" !== namespace && array.length > 0) {
+      const solutionName = array[0];
+      const solution = ctx.globalSolutions.get(solutionName);
+      if (solution && solution.executeUserTask) {
+        const solutionContext = this.createSolutionAllContext(ctx);
+        ctx.solutionContext = solutionContext;
+        return await solution.executeUserTask(solutionContext, func, inputs);
+      }
+    }
+    return err(
+      returnUserError(
+        new Error(`executeUserTaskRouteFailed:${JSON.stringify(func)}`),
+        error.CoreSource,
+        error.CoreErrorNames.executeUserTaskRouteFailed
+      )
+    );
+  }
 
   @hooks([projectTypeCheckerMW])
   static async getProjectConfigs( ctx: CoreContext, inputs: Inputs ): Promise<Result<ProjectConfigs, FxError>> {

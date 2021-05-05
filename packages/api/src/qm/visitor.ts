@@ -101,20 +101,15 @@ const questionVisitor: QuestionVistor = async function (
   totalSteps?: number,
 ): Promise<InputResult> {  
   if (question.type === NodeType.func) {
-     const funcQuestion = question as FuncQuestion;
-     return await ui.showFuncQuestion({
-      title: funcQuestion.title || funcQuestion.name,
-      step: step,
-      totalSteps: totalSteps,
-      func: funcQuestion
-     });
+    const res = await question.func(inputs);
+    return { type: InputResultType.sucess, result: res };
   } else {
     const defaultValue = question.value? question.value : await getCallFuncValue(inputs, question.default);
+    const placeholder = await getCallFuncValue(inputs, question.placeholder) as string;
+    const prompt = await getCallFuncValue(inputs, question.prompt) as string;
+    const validationFunc = question.validation ? getValidationFunction(question.validation, inputs) : undefined;
     if (question.type === NodeType.text || question.type === NodeType.number) {
-      const inputQuestion: TextInputQuestion | NumberInputQuestion = question as (TextInputQuestion | NumberInputQuestion);
-      const validationFunc = inputQuestion.validation ? getValidationFunction(inputQuestion.validation, inputs) : undefined;
-      const placeholder = await getCallFuncValue(inputs, inputQuestion.placeholder) as string;
-      const prompt = await getCallFuncValue(inputs, inputQuestion.prompt) as string;
+      const inputQuestion = question as (TextInputQuestion | NumberInputQuestion);
       return await ui.showInputBox({
         title: question.title,
         password: (inputQuestion as TextInputQuestion).password,
@@ -127,7 +122,7 @@ const questionVisitor: QuestionVistor = async function (
         totalSteps: totalSteps
       });
     } else if (question.type === NodeType.singleSelect || question.type === NodeType.multiSelect) {
-      const selectQuestion: SingleSelectQuestion | MultiSelectQuestion = question as | SingleSelectQuestion | MultiSelectQuestion;
+      const selectQuestion = question as (SingleSelectQuestion | MultiSelectQuestion);
       const res = await loadOptions(selectQuestion, inputs);
       if (!res.options || res.options.length === 0) {
         return {
@@ -147,33 +142,45 @@ const questionVisitor: QuestionVistor = async function (
           result: returnResult
         };
       }
-      const placeholder = await getCallFuncValue(inputs, selectQuestion.placeholder) as string;
-      const mq = (selectQuestion as MultiSelectQuestion);
-      const validationFunc = mq.validation ? getValidationFunction( mq.validation, inputs) : undefined;
-      return await ui.showQuickPick({
-        title: question.title,
-        items: res.options,
-        canSelectMany: !!(question.type === NodeType.multiSelect),
-        returnObject: selectQuestion.returnObject,
-        defaultValue: defaultValue as (string | string[]),
-        placeholder: placeholder,
-        onDidChangeSelection: question.type === NodeType.multiSelect ? (selectQuestion as MultiSelectQuestion).onDidChangeSelection : undefined,
-        step: step,
-        totalSteps: totalSteps,
-        validation: validationFunc
-      });
+      if(question.type === NodeType.singleSelect){
+        return await ui.showSingleQuickPick({
+          title: question.title,
+          items: res.options,
+          returnObject: selectQuestion.returnObject,
+          defaultValue: defaultValue as string,
+          placeholder: placeholder,
+          prompt: prompt,
+          step: step,
+          totalSteps: totalSteps
+        });
+      }
+      else {
+        const mq = selectQuestion as MultiSelectQuestion;
+        return await ui.showMultiQuickPick({
+          title: question.title,
+          items: res.options,
+          returnObject: selectQuestion.returnObject,
+          defaultValue: defaultValue as string[],
+          placeholder: placeholder,
+          prompt: prompt,
+          onDidChangeSelection: question.type === NodeType.multiSelect ? mq.onDidChangeSelection : undefined,
+          step: step,
+          totalSteps: totalSteps,
+          validation: validationFunc
+        });
+      }
     } else if (question.type === NodeType.file) {
-      const fileQuestion: FileQuestion = question as FileQuestion;
-      const validationFunc = fileQuestion.validation ? getValidationFunction(fileQuestion.validation, inputs) : undefined;
-      return await ui.showFileOpenDialog({
+      return await ui.showFileSelector({
+        title: question.title,
+        placeholder: placeholder,
+        prompt: prompt,
         defaultUri: defaultValue as string,
         canSelectFiles: false,
         canSelectFolders: true,
         canSelectMany: false,
-        title: question.title,
-        validation: validationFunc,
         step: step,
-        totalSteps: totalSteps
+        totalSteps: totalSteps,
+        validation: validationFunc
       });
     }
   }
