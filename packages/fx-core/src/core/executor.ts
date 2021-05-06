@@ -35,7 +35,7 @@ import * as error from "./error";
 import { CoreContext } from "./context";
 import { DefaultSolution } from "../plugins/solution/default";
 import { deepCopy, initFolder, mergeDict, replaceTemplateVariable } from "./tools";
-import { CoreQuestionNames, QuestionAppName, QuestionEnvLocal, QuestionEnvName, QuestionEnvSideLoading, QuestionRootFolder, QuestionSelectEnv, QuestionSelectSolution } from "./question";
+import { CoreQuestionNames, QuestionAppName, QuestionEnvLocal, QuestionEnvName, QuestionEnvSideLoading, QuestionRootFolder, QuestionSelectEnv, QuestionSelectSolution, SampleSelect, ScratchOptionNo, ScratchOptionYes, ScratchOrSampleSelect } from "./question";
 import * as fs from "fs-extra";
 import * as path from "path";
 
@@ -158,28 +158,38 @@ export class Executor {
       node.addChild(new QTreeNode(QuestionSelectEnv));
     }
     else if (task === Task.create) {
+      const scratchSelectNode = new QTreeNode(ScratchOrSampleSelect);
+      node.addChild(scratchSelectNode);
+      
+      const scratchNode = new QTreeNode({type:NodeType.group});
+      scratchNode.condition = {equals: ScratchOptionYes.id};
+      scratchSelectNode.addChild(scratchNode);
+      
+      const sampleNode = new QTreeNode(SampleSelect);
+      sampleNode.condition = {equals: ScratchOptionNo.id};
+      scratchSelectNode.addChild(sampleNode);
+
       //make sure that global solutions are loaded
       const solutionNames: string[] = [];
       for (const k of ctx.globalSolutions.keys()) {
-        solutionNames.push(k);
+          solutionNames.push(k);
       }
       const selectSolution: SingleSelectQuestion = QuestionSelectSolution;
       selectSolution.option = solutionNames;
-      const select_solution = new QTreeNode(selectSolution);
-      node.addChild(select_solution);
-      for (const [k, solution] of ctx.globalSolutions) {
-        if (solution.getQuestionsForLifecycleTask) {
-          const res = await solution.getQuestionsForLifecycleTask( solutionContext, task, inputs);
-          if (res.isErr()) return res;
-          if (res.value) {
+      const solutionSelectNode = new QTreeNode(selectSolution);
+      scratchNode.addChild(solutionSelectNode);
+      for (const [k, v] of ctx.globalSolutions) {
+        const res = await v.getQuestionsForLifecycleTask(solutionContext, task, inputs);
+        if (res.isErr()) return res;
+        if(res.value){
             const solutionNode = res.value as QTreeNode;
             solutionNode.condition = { equals: k };
-            if (solutionNode.data) select_solution.addChild(solutionNode);
-          }
+            if (solutionNode.data) solutionSelectNode.addChild(solutionNode);
         }
       }
-      node.addChild(new QTreeNode(QuestionRootFolder));
-      node.addChild(new QTreeNode(QuestionAppName));
+      scratchNode.addChild(new QTreeNode(QuestionRootFolder));
+      scratchNode.addChild(new QTreeNode(QuestionAppName));
+      sampleNode.addChild(new QTreeNode(QuestionRootFolder));
     } else if (ctx.solution) {
       const res = await ctx.solution.getQuestionsForLifecycleTask(solutionContext, task, inputs);
       if (res.isErr()) return res;
