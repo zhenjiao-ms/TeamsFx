@@ -205,12 +205,7 @@ export async function switchEnvHandler(): Promise<Result<unknown, FxError>> {
   });
   return await runCommand(Task.switchEnv);
 }
-
-const coreExeceutor: RemoteFuncExecutor = async function ( func: Func, answers: Inputs
-): Promise<Result<unknown, FxError>> {
-  return await core.executeQuestionFlowFunction(func, answers);
-};
-
+ 
 export async function runCommand(task: Task): Promise<Result<unknown, FxError>> {
   const eventName = ExtTelemetry.TaskToEvent(task);
   let result: Result<unknown, FxError> = ok(Void);
@@ -252,11 +247,11 @@ export async function runCommand(task: Task): Promise<Result<unknown, FxError>> 
     const node = qres.value;
     if (node) {
       VsCodeLogInstance.info(`Question tree:${JSON.stringify(node, null, 4)}`);
-      const res: InputResult = await traverse(node, inputs, VS_CODE_UI, coreExeceutor);
+      const res: InputResult = await traverse(node, inputs, VS_CODE_UI);
       VsCodeLogInstance.info(`User input:${JSON.stringify(inputs)}`);
       if (res.type === InputResultType.error) {
         throw res.error!;
-      } else if (res.type === InputResultType.cancel) {
+      } else if (res.type === InputResultType.cancel || res.type === InputResultType.back) {
         throw new UserError(ExtensionErrors.UserCancel, "User Cancel", ExtensionSource);
       }
     }
@@ -359,7 +354,7 @@ async function runUserTask(func: Func): Promise<Result<unknown, FxError>> {
     const node = qres.value;
     if (node) {
       VsCodeLogInstance.info(`Question tree:${JSON.stringify(node, null, 4)}`);
-      const res: InputResult = await traverse(node, inputs, VS_CODE_UI, coreExeceutor);
+      const res: InputResult = await traverse(node, inputs, VS_CODE_UI);
       VsCodeLogInstance.info(`User input:${JSON.stringify(res, null, 4)}`);
       if (res.type === InputResultType.error && res.error) {
         throw res.error;

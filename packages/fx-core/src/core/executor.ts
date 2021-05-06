@@ -158,7 +158,6 @@ export class Executor {
       node.addChild(new QTreeNode(QuestionSelectEnv));
     }
     else if (task === Task.create) {
-      
       //make sure that global solutions are loaded
       const solutionNames: string[] = [];
       for (const k of ctx.globalSolutions.keys()) {

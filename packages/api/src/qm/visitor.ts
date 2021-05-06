@@ -247,7 +247,6 @@ export async function traverse(
           }
         }
         stack.push(curr);
-        -- step;
         // find the previoud input that is neither group nor func nor single option select
         let found = false;
         while (history.length > 0) {
@@ -264,7 +263,6 @@ export async function traverse(
             }
           }
           stack.push(last);
-          -- step;
           let autoSkip = false;
           if(last.data.type === NodeType.singleSelect || last.data.type === NodeType.multiSelect){
             const loadOptionRes = await loadOptions(last.data, inputs);

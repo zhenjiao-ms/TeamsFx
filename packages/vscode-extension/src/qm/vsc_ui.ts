@@ -89,14 +89,14 @@ function isSame(set1: Set<string>, set2: Set<string>):boolean{
 
 export class VsCodeUI implements UserInterface{
   
-  showSteps:boolean = false;
+  showSteps = false;
 
   async showSingleQuickPick (option: FxSingleQuickPickOption) : Promise<InputResult>{
     if(option.items.length === 0){
       return {
         type: InputResultType.error,
         error: returnSystemError(new Error("select option is empty"), ExtensionSource, ExtensionErrors.EmptySelectOption)
-      }
+      };
     }
     const okButton : QuickInputButton = { 
       iconPath: Uri.file(ext.context.asAbsolutePath("media/ok.svg")),
@@ -106,7 +106,7 @@ export class VsCodeUI implements UserInterface{
     try {
       const quickPick = window.createQuickPick<FxQuickPickItemImpl>();
       quickPick.title = option.title;
-      if (option.step && option.step > 0) quickPick.buttons = [QuickInputButtons.Back, okButton];
+      if (option.step && option.step > 1) quickPick.buttons = [QuickInputButtons.Back, okButton];
       else quickPick.buttons = [okButton];
       quickPick.placeholder = option.placeholder;
       quickPick.ignoreFocusOut = false;
@@ -177,7 +177,7 @@ export class VsCodeUI implements UserInterface{
     try {
         const quickPick = window.createQuickPick<FxQuickPickItemImpl>();
         quickPick.title = option.title;
-        if (option.step && option.step > 0) quickPick.buttons = [QuickInputButtons.Back, okButton];
+        if (option.step && option.step > 1) quickPick.buttons = [QuickInputButtons.Back, okButton];
         else quickPick.buttons = [okButton];
         quickPick.placeholder = option.placeholder;
         quickPick.ignoreFocusOut = false;
@@ -285,7 +285,7 @@ export class VsCodeUI implements UserInterface{
     try {
       const inputBox: InputBox = window.createInputBox();
       inputBox.title = option.title;
-      if (option.step && option.step > 0) inputBox.buttons = [QuickInputButtons.Back, okButton];
+      if (option.step && option.step > 1) inputBox.buttons = [QuickInputButtons.Back, okButton];
       else inputBox.buttons = [okButton];
       inputBox.placeholder = option.placeholder;
       inputBox.value = option.defaultValue || "";
@@ -360,7 +360,7 @@ export class VsCodeUI implements UserInterface{
     try {
       const quickPick: QuickPick<QuickPickItem> = window.createQuickPick();
       quickPick.title = option.title;
-      if (option.step && option.step > 0) quickPick.buttons = [QuickInputButtons.Back, okButton];
+      if (option.step && option.step > 1) quickPick.buttons = [QuickInputButtons.Back, okButton];
       else quickPick.buttons = [okButton];
       quickPick.ignoreFocusOut = true;
       quickPick.placeholder = option.placeholder;
@@ -380,12 +380,9 @@ export class VsCodeUI implements UserInterface{
           };
 
           disposables.push(
-            // quickPick.onDidAccept(onDidAccept),
             quickPick.onDidHide(() => {
               resolve({ type: InputResultType.cancel});
-            })
-          );
-          disposables.push(
+            }),
             quickPick.onDidTriggerButton((button) => { 
               if (button === QuickInputButtons.Back)
                 resolve({ type: InputResultType.back });
@@ -393,8 +390,9 @@ export class VsCodeUI implements UserInterface{
                 onDidAccept();
             })
           );
+
           /// set items
-          // quickPick.items = [{label: option.prompt || "Select folder", detail: option.defaultUri}];
+          quickPick.items = [{label: option.prompt || "Select folder", detail: option.defaultUri}];
           const onDidChangeSelection = async function(items:QuickPickItem[]):Promise<any>{
             const defaultUrl = items[0].detail;
             const uri = await window.showOpenDialog({
