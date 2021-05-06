@@ -24,7 +24,7 @@ describe("MsGraphClientProvider Tests - Browser", () => {
     });
   }
 
-  beforeEach(function () {
+  beforeEach(function() {
     loadDefaultConfig();
   });
 
@@ -45,14 +45,14 @@ describe("MsGraphClientProvider Tests - Browser", () => {
     expect(graphClient.config.authProvider.credential).to.be.instanceOf(TeamsUserCredential);
   });
 
-  it("createMicrosoftGraphClient should success with empty scope", function () {
+  it("createMicrosoftGraphClient should success with empty scope", function() {
     const credential = new TeamsUserCredential();
     const graphClient: any = createMicrosoftGraphClient(credential, emptyScope);
     assert.strictEqual(graphClient.config.authProvider.scopes, defaultScope);
     expect(graphClient.config.authProvider.credential).to.be.instanceOf(TeamsUserCredential);
   });
 
-  it("createMicrosoftGraphClient should success without providing scope", function () {
+  it("createMicrosoftGraphClient should success without providing scope", function() {
     const credential = new TeamsUserCredential();
     const graphClient: any = createMicrosoftGraphClient(credential);
     assert.strictEqual(graphClient.config.authProvider.scopes, defaultScope);

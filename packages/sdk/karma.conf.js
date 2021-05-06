@@ -2,7 +2,7 @@
 process.env.CHROME_BIN = require("puppeteer").executablePath();
 require("dotenv").config();
 
-module.exports = function (config) {
+module.exports = function(config) {
   config.set({
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: "./",
@@ -64,7 +64,7 @@ module.exports = function (config) {
       "SDK_INTEGRATION_TEST_AAD_TENANT_ID",
       "SDK_INTEGRATION_TEST_AAD_AUTHORITY_HOST",
       "SDK_INTEGRATION_TEST_TEAMS_ACCESS_AS_USER_SCOPE",
-      "SDK_INTEGRATION_TEST_USER_OBJECT_ID",
+      "SDK_INTEGRATION_TEST_USER_OBJECT_ID"
     ],
 
     // test results reporter to use

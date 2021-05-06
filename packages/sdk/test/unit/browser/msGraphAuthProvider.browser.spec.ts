@@ -8,7 +8,6 @@ import {
   MsGraphAuthProvider,
   loadConfiguration,
   TeamsUserCredential,
-  GetTokenOptions,
   ErrorWithCode,
   ErrorCode
 } from "../../../src";
@@ -34,7 +33,7 @@ describe("MsGraphAuthProvider Tests - Browser", () => {
     });
   }
 
-  beforeEach(function () {
+  beforeEach(function() {
     loadDefaultConfig();
   });
 
@@ -54,21 +53,21 @@ describe("MsGraphAuthProvider Tests - Browser", () => {
     assert.strictEqual(authProvider.scopes, scopes);
   });
 
-  it("create MsGraphAuthProvider instance should success with empty scope", async function () {
+  it("create MsGraphAuthProvider instance should success with empty scope", async function() {
     const credential = new TeamsUserCredential();
     const authProvider: any = new MsGraphAuthProvider(credential, emptyScope);
     assert.strictEqual(authProvider.scopes, defaultScope);
   });
 
-  it("create MsGraphAuthProvider instance should success without providing scope", async function () {
+  it("create MsGraphAuthProvider instance should success without providing scope", async function() {
     const credential = new TeamsUserCredential();
     const authProvider: any = new MsGraphAuthProvider(credential);
     assert.strictEqual(authProvider.scopes, defaultScope);
   });
 
-  it("getAccessToken should success with valid config", async function () {
+  it("getAccessToken should success with valid config", async function() {
     sinon.stub(TeamsUserCredential.prototype, "getToken").callsFake(
-      (scopes: string | string[], options?: GetTokenOptions): Promise<AccessToken | null> => {
+      (): Promise<AccessToken | null> => {
         const token: AccessToken = {
           token: accessToken,
           expiresOnTimestamp: Date.now()
@@ -82,6 +81,24 @@ describe("MsGraphAuthProvider Tests - Browser", () => {
     const authProvider = new MsGraphAuthProvider(credential, scopes);
     const token = await authProvider.getAccessToken();
     assert.strictEqual(token, accessToken);
+    sinon.restore();
+  });
+
+  it("getAccessToken should throw UiRequiredError with unconsent scope", async function() {
+    sinon.stub(TeamsUserCredential.prototype, "getToken").callsFake(
+      (): Promise<AccessToken | null> => {
+        throw new ErrorWithCode(
+          "Failed to get access token from authentication server, please login first.",
+          ErrorCode.UiRequiredError
+        );
+      }
+    );
+    const unconsentScopes = "unconsent_scope";
+    const credential = new TeamsUserCredential();
+    const authProvider = new MsGraphAuthProvider(credential, unconsentScopes);
+    await expect(authProvider.getAccessToken())
+      .to.eventually.be.rejectedWith(ErrorWithCode)
+      .and.property("code", ErrorCode.UiRequiredError);
     sinon.restore();
   });
 });
