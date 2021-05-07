@@ -25,7 +25,7 @@ export function getValidationFunction(
 export async function validate(
   validSchema: ValidationSchema,
   value: string | string[] | number,
-  inputs: Inputs
+  inputs?: Inputs
 ): Promise<string | undefined> {
   {
     //FuncValidation

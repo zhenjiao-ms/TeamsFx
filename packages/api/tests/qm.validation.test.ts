@@ -14,6 +14,9 @@ import * as fs from "fs-extra";
 import * as os from "os";
 import * as path from "path";
  
+/**
+ * cmd: mocha -r ts-node/register --no-timeout tests/qm.validation.test.ts
+ */
 
 describe("Question Model - Validation Test", () => {
   describe("StringValidation", () => {
@@ -395,7 +398,7 @@ describe("Question Model - Validation Test", () => {
 
     it("notExist", async () => {
       const validation: FileValidation = {
-        notExist: true
+        exists: false
       };
       const folder = os.tmpdir();
       const value1 = folder;
