@@ -1,7 +1,7 @@
 {
   "name": "@microsoft/teamsfx",
   "version": "0.1.0",
-  "description": "Microsoft Teams App Framework SDK for node.js and browser.",
+  "description": "Microsoft Teams Framework for Node.js and browser.",
   "main": "dist/index.js",
   "module": "dist-esm/src/index.js",
   "private": true,
@@ -19,7 +19,7 @@
     "build:node": "tsc -p . && cross-env ONLY_NODE=true rollup -c 2>&1",
     "build:test": "tsc -p . && rollup -c rollup.test.config.js 2>&1",
     "build": "tsc -p . && api-extractor run --local",
-    "build:api-markdown": "tsc -p . && api-extractor run --local && api-documenter markdown -i temp -o doc",
+    "build:api-markdown": "tsc -p . && api-extractor run --local && api-documenter markdown -i temp -o ../../docs/sdk",
     "check-format": "prettier --list-different --config ./.prettierrc.json --ignore-path ./.prettierignore \"src/**/*.ts\" \"test/**/*.ts\" \"samples/**/*.ts\" \"*.{js,json}\"",
     "clean": "rimraf dist dist-* temp types *.tgz *.log",
     "format": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore \"src/**/*.ts\" \"test/**/*.ts\" \"samples/**/*.ts\" \"*.{js,json}\"",
