@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
-import { PluginContext, ReadonlyPluginConfig } from "fx-api";
+
+import { PluginContext, ReadonlyPluginConfig } from "@microsoft/teamsfx-api";
 import { TokenCredentialsBase } from "@azure/ms-rest-nodeauth";
 
 import { Constants, DependentPluginInfo, FrontendConfigInfo } from "./constants";
