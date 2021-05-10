@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import {
+  AnyValidation,
   FileValidation,
   FuncValidation,
   NumberValidation,
@@ -16,15 +17,15 @@ import { Inputs } from "../types";
 export function getValidationFunction(
   validation: ValidationSchema,
   inputs: Inputs
-): (input: string | string[] | number)  => Promise<string | undefined> {
-  return async function(input: string | string[] | number): Promise<string | undefined> {
+): (input: string | string[] | undefined)  => Promise<string | undefined> {
+  return async function(input: string | string[] | undefined): Promise<string | undefined> {
     return await validate(validation, input, inputs);
   };
 }
 
 export async function validate(
   validSchema: ValidationSchema,
-  value: string | string[] | number,
+  value: string | string[] | undefined,
   inputs?: Inputs
 ): Promise<string | undefined> {
   {
@@ -35,15 +36,18 @@ export async function validate(
       return res as string;
     }
   }
+  
+  if(value === undefined){
+    if((validSchema as AnyValidation).required === true)
+      return `input value is required but undefined`;
+    return undefined;
+  }
 
   {
     //FileValidation
     const fileValidation: FileValidation = validSchema as FileValidation;
     if (fileValidation.exists !== undefined) {
       const path = value as string;
-      if (!path) {
-        return `file path should not be empty!`;
-      }
       const exists = await fs.pathExists(path);
       if (fileValidation.exists !== exists) {
         return `'${path}' does not meet condition of existance = ${fileValidation.exists}`;
@@ -57,7 +61,6 @@ export async function validate(
     const stringValidation: StringValidation = validSchema as StringValidation;
     const strToValidate = value as string;
     if (typeof strToValidate === "string") {
-      
       const schema: any = {};
       if (stringValidation.equals && typeof stringValidation.equals === "string")
         schema.const = stringValidation.equals;
@@ -71,7 +74,7 @@ export async function validate(
       if (stringValidation.maxLength) schema.maxLength = stringValidation.maxLength;
       if (stringValidation.pattern) schema.pattern = stringValidation.pattern;
       if (Object.keys(schema).length > 0) {
-        const validateResult = jsonschema.validate(value, schema);
+        const validateResult = jsonschema.validate(strToValidate, schema);
         if (validateResult.errors && validateResult.errors.length > 0) {
           return `'${strToValidate}' ${validateResult.errors[0].message}`;
         }

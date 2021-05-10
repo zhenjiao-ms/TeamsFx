@@ -219,11 +219,9 @@ export async function traverse(
           parentValue = (sq.value as OptionItem).id;
         }
       } 
-      if (parentValue) {
-        const validRes = await validate(curr.condition, parentValue as string | string[] | number, inputs);
-        if (validRes !== undefined) {
-          continue;
-        }
+      const validRes = await validate(curr.condition, parentValue as string | string[] | undefined, inputs);
+      if (validRes !== undefined) {
+        continue;
       }
     }
 

@@ -143,7 +143,7 @@ export interface FileValidation extends AnyValidation {
  * The validation is checked by a validFunc provided by user
  */
 export interface FuncValidation {
-    validFunc?: (input: string|string[]|number, previousInputs?: Inputs) => string | undefined | Promise<string | undefined>;
+    validFunc?: (input: string|string[]|undefined, previousInputs?: Inputs) => string | undefined | Promise<string | undefined>;
 }
 
 export type ValidationSchema =

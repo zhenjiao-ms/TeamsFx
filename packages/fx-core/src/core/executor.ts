@@ -143,7 +143,7 @@ export class Executor {
     if(task === Task.createEnv){
       node.addChild(new QTreeNode(QuestionEnvName));
       QuestionEnvName.validation = {
-        validFunc : (input: string|string[]|number, previousInputs: Inputs) : string | undefined | Promise<string | undefined> => {
+        validFunc : (input: string|string[]|undefined, previousInputs?: Inputs) : string | undefined | Promise<string | undefined> => {
           const envName = input as string;
           if(ctx.projectSetting.environments[envName])
             return `enviroment already exist!`;
