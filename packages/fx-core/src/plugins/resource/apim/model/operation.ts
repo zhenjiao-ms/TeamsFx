@@ -50,7 +50,7 @@ export class AzureResource {
 
     static Aad: IName = {
         shortName: "aad",
-        displayName: "Azure Active Directory",
+        displayName: "Azure Active Directory application",
     };
 
     static AadSecret: IName = {
